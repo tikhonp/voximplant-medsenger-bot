@@ -83,7 +83,7 @@ class SettingsFormsUpdate(GenericAPIView):
 
 
 class SettingsTimeSlotsUpdate(GenericAPIView):
-    serializers_class = serializers.SettingsTimeSlotSerializer
+    serializer_class = serializers.SettingsTimeSlotSerializer
     queryset = Contract.objects.all()
 
     def process_request(self, request) -> (time, Contract):
