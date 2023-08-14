@@ -15,7 +15,9 @@ def check_current_calls():
 
     for contract in contracts_with_active_forms:
         forms = contract.forms.exclude(
-            Q(forms__call_set__updated_at__gte=from_date) & Q(forms__call_set__state=Call.State.SUCCESS))
+            Q(forms__call_set__updated_at__gte=from_date) &
+            Q(forms__call_set__state=Call.State.SUCCESS)
+        )
 
         for form in forms:
             form.start_call(contract)

@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
+from medsenger_api import AgentApiClient
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -120,8 +121,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-APP_KEY = os.getenv('APP_KEY')
-MAIN_HOST = "https://medsenger.ru"
+MEDSENGER_APP_KEY = os.getenv('APP_KEY')
+MEDSENGER_AGENT_ID = os.getenv('AGENT_ID')
+MEDSENGER_MAIN_HOST = os.getenv('')
+
+MEDSENGER_API_CLIENT = AgentApiClient(MEDSENGER_APP_KEY, MEDSENGER_MAIN_HOST, MEDSENGER_AGENT_ID, DEBUG)
 
 X_FRAME_OPTIONS = 'ALLOW-FROM medsenger.ru'
 CSRF_TRUSTED_ORIGINS = ['https://medsenger.ru']
@@ -136,3 +140,8 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.BrowsableAPIRenderer',
     ]
 }
+
+VOXIMPLANT_ACCESS_TOKEN = os.getenv("VOXIMPLANT_ACCESS_TOKEN")
+VOXIMPLANT_ACCOUNT_NAME = os.getenv("VOXIMPLANT_ACCOUNT_NAME")
+VOXIMPLANT_API_HOSTNAME = os.getenv("VOXIMPLANT_API_HOSTNAME")
+VOXIMPLANT_CALLER_ID = os.getenv("VOXIMPLANT_CALLER_ID")
