@@ -38,5 +38,5 @@ class SettingsTimeSlotSerializer(serializers.Serializer):
 
 class ContractSerializer(serializers.Serializer):
     contract_id = serializers.IntegerField()
-    forms = serializers.ListSerializer(child=FormSerializer(), source='form_set')
+    forms = serializers.ListSerializer(child=FormSerializer())
     time_slots = serializers.ListSerializer(child=TimeSlotSerializer(), source='time_slot_set')

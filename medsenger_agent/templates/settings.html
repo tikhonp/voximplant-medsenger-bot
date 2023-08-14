@@ -12,12 +12,16 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.26.1/axios.min.js"
             integrity="sha512-bPh3uwgU5qEMipS/VOmRqynnMXGGSRv+72H/N260MQeXZIK4PG48401Bsby9Nq5P5fz7hy5UGNmC/W1Z51h2GQ=="
             crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://code.jquery.com/jquery-3.7.0.slim.min.js"
+            integrity="sha256-tG5mcZUtJsZvyKAxYLVXrmjKBVLd6VpVccqz/r4ypFE="   crossorigin="anonymous"></script>
 </head>
 <body>
-<div id="app">
-    <div class="d-flex justify-content-center">
-        <div class="spinner-border" role="status">
-            <span class="visually-hidden">Loading...</span>
+<div class="container mt-2">
+    <div id="app">
+        <div class="d-flex justify-content-center">
+            <div class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
         </div>
     </div>
 </div>
@@ -25,15 +29,208 @@
         integrity="sha384-HwwvtgBNo3bZJJLYd8oVXjrBZt8cqVSpeBNS5n7C8IVInixGAoxmnlMuBnhbgrkm"
         crossorigin="anonymous"></script>
 <script>
+    const baseUrl = "{{ base_url }}"
+    const agentToken = "{{ agent_token }}"
+
+    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+    axios.defaults.xsrfCookieName = "csrftoken";
+
     const app = Vue.createApp({
         delimiters: ['[[',']]'],
         data() {
             return {
+                contractDataLoading: true,
 
+                connectedForms: [],
+                timeSlots: [],
+                forms: [],
+
+                timeHourSelected: -1,
+                timeMinuteSelected: -1,
             }
         },
+        methods: {
+            fetchContract() {
+                this.contractDataLoading = true
+                let url = `${baseUrl}/medsenger/settings/contract/`
+                axios.get(url, { params: { agent_token: agentToken } })
+                    .then((response) => {
+                        this.connectedForms = response.data.forms
+                        this.timeSlots = response.data.time_slots
+                        this.contractDataLoading = false
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+            },
+            deleteForm(id) {
+                let url = `${baseUrl}/medsenger/settings/forms/`
+                axios.delete(url, {
+                    params: { agent_token: agentToken },
+                    data: { form_id: id },
+                    withCredentials: true,
+                })
+                .then((response) => {
+                    this.fetchContract()
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+            },
+            addForm(id) {
+                let url = `${baseUrl}/medsenger/settings/forms/`
+                let data = { form_id: id }
+                axios.post(url, data, {
+                    params: { agent_token: agentToken },
+                    withCredentials: true,
+                })
+                .then((response) => {
+                    this.fetchContract()
+                    $('#addContractModal').modal('hide')
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+            },
+            addTimeSlot() {
+                let url = `${baseUrl}/medsenger/settings/time_slots/`
+                let data = { time: `${this.timeHourSelected}:${this.timeMinuteSelected}` }
+                axios.post(url, data, {
+                    params: { agent_token: agentToken },
+                    withCredentials: true,
+                })
+                .then((response) => {
+                    this.fetchContract()
+                    $('#AddTimeSlot').modal('hide')
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+            },
+            removeTimeSlot(time) {
+                let url = `${baseUrl}/medsenger/settings/time_slots/`
+                let data = { time: this.formatTimeSlotTime(time) }
+                axios.delete(url, {
+                    params: { agent_token: agentToken },
+                    data: data,
+                    withCredentials: true,
+                })
+                .then((response) => {
+                    this.fetchContract()
+                    $('#AddTimeSlot').modal('hide')
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+            },
+            fetchForms() {
+                let url = `${baseUrl}/forms/`
+                axios.get(url)
+                .then((response) => {
+                    this.forms = response.data
+                })
+                .catch((error) => {
+                    console.log(error)
+                })
+            },
+            formatTimeSlotTime(time) {
+                let [hour, minute, _] = time.split(':')
+                return `${hour}:${minute}`
+            }
+        },
+        mounted() {
+            this.fetchContract()
+        },
         template: `
-            <h1>Здесь нужно сделать этот шаблон</h1>
+            <div v-if="contractDataLoading" class="d-flex justify-content-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+            <div v-else>
+                <h1>Настройки агента звонков</h1>
+
+                <h5 class="mt-5">Подключенные опросники</h5>
+                <div class="list-group">
+                    <div v-for="form in connectedForms" class="list-group-item d-flex justify-content-between align-items-center">
+                        [[ form.name ]]
+                    <button type="button" class="btn btn-danger" @click="deleteForm(form.id)">Удалить</button>
+                    </div>
+                    <button type="button" class="list-group-item list-group-item-action active"
+                            aria-current="true" data-bs-toggle="modal" data-bs-target="#addContractModal"
+                            @click="fetchForms()">
+                        Добавить
+                    </button>
+                </div>
+
+                <h5 class="mt-5">Предпочтительное время для звонков</h5>
+                <div class="list-group">
+                    <div v-for="timeSlot in timeSlots" class="list-group-item d-flex justify-content-between align-items-center">
+                        [[ formatTimeSlotTime(timeSlot.time) ]]
+                    <button type="button" class="btn btn-danger" @click="removeTimeSlot(timeSlot.time)">Удалить</button>
+                    </div>
+                    <button type="button" class="list-group-item list-group-item-action active"
+                            aria-current="true" data-bs-toggle="modal" data-bs-target="#AddTimeSlot">
+                        Добавить
+                    </button>
+                </div>
+            </div>
+
+            <div class="modal fade" id="AddTimeSlot" tabindex="-1" aria-labelledby="AddTimeSlotLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Выберите удобное время</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="list-group">
+                                <div class="row">
+                                  <div class="col">
+                                    <select class="form-select" v-model="timeHourSelected">
+                                      <option disabled value="-1">Час</option>
+                                      <option v-for="i in 24">[[ i ]]</option>
+                                    </select>
+                                  </div>
+                                  <div class="col">
+                                    <select class="form-select" v-model="timeMinuteSelected">
+                                      <option disabled value="-1">Минута</option>
+                                      <option v-for="(n, i) in 60">[[ i ]]</option>
+                                    </select>
+                                  </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                            <button v-if="timeHourSelected !== -1 && timeMinuteSelected !== -1" type="button"
+                                    class="btn btn-primary" @click="addTimeSlot()">Добавить</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal fade" id="addContractModal" tabindex="-1" aria-labelledby="addContractModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h1 class="modal-title fs-5" id="exampleModalLabel">Выберите опросник</h1>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="list-group">
+                                <button v-for="form in forms" type="button" class="list-group-item list-group-item-action active"
+                                        aria-current="true" @click="addForm(form.id)">
+                                    Добавить: [[ form.name ]]
+                                </button>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
         `
     }).mount("#app");
 </script>

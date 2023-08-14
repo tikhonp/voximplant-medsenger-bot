@@ -128,6 +128,8 @@ CSRF_TRUSTED_ORIGINS = ['https://medsenger.ru']
 CSRF_COOKIE_SAMESITE = None
 XS_SHARING_ALLOWED_METHODS = ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE']
 
+CSRF_COOKIE_NAME = "csrftoken"
+
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',

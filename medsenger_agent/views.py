@@ -14,6 +14,7 @@ from medsenger_agent import serializers
 from medsenger_agent.models import Contract
 
 APP_KEY = settings.APP_KEY
+DOMAIN = settings.DOMAIN
 
 
 class InitAPIView(CreateAPIView):
@@ -69,7 +70,7 @@ class SettingsFormsUpdate(GenericAPIView):
 
     def post(self, request):
         form_id, contract = self.process_request(request)
-        contract.form_set.add(
+        contract.forms.add(
             get_object_or_404(Form.objects.all(), id=form_id)
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
@@ -99,15 +100,12 @@ class SettingsTimeSlotsUpdate(GenericAPIView):
 
     def post(self, request):
         time_data, contract = self.process_request(request)
-        time_slot, _ = TimeSlot.objects.get_or_create(time=time_data)
-        contract.form_set.add(time_slot)
+        time_slot, _ = TimeSlot.objects.get_or_create(time=time_data, contract=contract)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def delete(self, request):
         time_data, contract = self.process_request(request)
-        contract.form_set.remove(
-            get_object_or_404(Form.objects.all(), time=time_data)
-        )
+        contract.time_slot_set.filter(time=time_data).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -125,7 +123,10 @@ class ContractDetail(APIView):
 def settings(request):
     if request.GET.get('api_key', '') != APP_KEY:
         return HttpResponse('"invalid key"', content_type='application/json', status=status.HTTP_401_UNAUTHORIZED)
-
     contract_id = request.GET.get('contract_id')
-
-    return render(request, 'settings.html', {'contract_id': contract_id})
+    contract = get_object_or_404(Contract.objects.all(), contract_id=contract_id)
+    return render(request, 'settings.html', {
+        'contract_id': contract_id,
+        'base_url': DOMAIN,
+        'agent_token': contract.agent_token,
+    })

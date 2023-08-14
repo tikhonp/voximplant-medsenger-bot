@@ -11,3 +11,8 @@ class FormAdmin(admin.ModelAdmin):
 @admin.register(models.TimeSlot)
 class TimeSlotAdmin(admin.ModelAdmin):
     list_display = ('time', 'contract')
+
+
+@admin.register(models.Call)
+class CallAdmin(admin.ModelAdmin):
+    list_display = ('form', 'state', 'created_at', 'contract')
