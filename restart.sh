@@ -1,0 +1,2 @@
+supervisorctl restart voximplant-courses
+supervisorctl restart voximplant-courses-jobs

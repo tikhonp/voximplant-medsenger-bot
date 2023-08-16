@@ -13,7 +13,7 @@ from forms.models import Form, TimeSlot
 from medsenger_agent import serializers
 from medsenger_agent.models import Contract
 
-APP_KEY = settings.APP_KEY
+MEDSENGER_APP_KEY = settings.MEDSENGER_APP_KEY
 DOMAIN = settings.DOMAIN
 
 
@@ -121,7 +121,7 @@ class ContractDetail(APIView):
 
 @require_http_methods(['GET'])
 def settings(request):
-    if request.GET.get('api_key', '') != APP_KEY:
+    if request.GET.get('api_key', '') != MEDSENGER_APP_KEY:
         return HttpResponse('"invalid key"', content_type='application/json', status=status.HTTP_401_UNAUTHORIZED)
     contract_id = request.GET.get('contract_id')
     contract = get_object_or_404(Contract.objects.all(), contract_id=contract_id)

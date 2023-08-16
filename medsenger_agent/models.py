@@ -1,12 +1,6 @@
-from datetime import time, datetime
-
-from django.db import models
-from django.db.models import Q
-from medsenger_api import AgentApiClient
-
-from forms.models import Call
-
 from django.conf import settings
+from django.db import models
+from medsenger_api import AgentApiClient
 
 MEDSENGER_API_CLIENT: AgentApiClient = settings.MEDSENGER_API_CLIENT
 
@@ -24,17 +18,3 @@ class Contract(models.Model):
         metadata = MEDSENGER_API_CLIENT.get_patient_info(self.contract_id)
         self.phone = metadata.get('phone')
         super().save(*args, **kwargs)
-
-    @staticmethod
-    def get_contracts_with_active_form(time_from: time, time_to: time, date_from: datetime):
-        return (
-            Contract
-            .objects
-            .select_related('forms')
-            .exclude(forms__isnull=True)
-            .filter(time_slot_set__time__in=(time_from, time_to))
-            .exclude(
-                Q(forms__call_set__updated_at__gte=date_from) &
-                Q(forms__call_set__state=Call.State.SUCCESS)
-            )
-        )
