@@ -32,6 +32,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'corsheaders',
     'rest_framework',
     'medsenger_agent',
     'forms',
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -125,7 +127,6 @@ MEDSENGER_AGENT_ID = os.getenv('MEDSENGER_AGENT_ID')
 MEDSENGER_MAIN_HOST = os.getenv('MEDSENGER_MAIN_HOST')
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
-CSRF_TRUSTED_ORIGINS = ['medsenger.ru']
 CSRF_COOKIE_SAMESITE = None
 XS_SHARING_ALLOWED_METHODS = ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE']
 

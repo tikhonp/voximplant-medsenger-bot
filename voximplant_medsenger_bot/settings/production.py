@@ -23,6 +23,16 @@ DEBUG = False
 #     profiles_sample_rate=1.0,
 # )
 
+CORS_ALLOWED_ORIGINS = [
+    'https://voximplant.ai.medsenger.ru',
+    'https://medsenger.ru',
+]
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://voximplant.ai.medsenger.ru',
+    'https://medsenger.ru',
+]
+
 ALLOWED_HOSTS = [
     'voximplant.ai.medsenger.ru',
 ]
