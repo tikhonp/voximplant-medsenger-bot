@@ -1,3 +1,5 @@
+from medsenger_api import AgentApiClient
+
 from .base import *
 
 DEBUG = True

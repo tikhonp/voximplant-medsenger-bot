@@ -2,7 +2,6 @@ import os
 from pathlib import Path
 
 from dotenv import load_dotenv
-from medsenger_api import AgentApiClient
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -13,7 +12,7 @@ if os.path.isfile(dotenv_file):
     load_dotenv(dotenv_file)
 
 SECRET_KEY = os.getenv(
-    "DJANGO_SECRET_KEY",
+    'DJANGO_SECRET_KEY',
     'django-insecure-lgztz$s5$c5$y)*_-5^&905pm5=4-1!la+a@ad*s=e-qxf#2+h',
 )
 
