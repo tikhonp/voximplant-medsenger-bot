@@ -10,5 +10,5 @@ sudo cp voximplant_medsenger_bot.conf /etc/supervisor/conf.d/
 sudo cp voximplant_nginx.conf /etc/nginx/sites-enabled/
 sudo supervisorctl update
 sudo systemctl restart nginx
-sudo certbot --nginx -d courses.ai.medsenger.ru
+sudo certbot --nginx -d voximplant.ai.medsenger.ru
 vim .env
