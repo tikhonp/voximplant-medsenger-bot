@@ -11,4 +11,4 @@ sudo cp voximplant_nginx.conf /etc/nginx/sites-enabled/
 sudo supervisorctl update
 sudo systemctl restart nginx
 sudo certbot --nginx -d voximplant.ai.medsenger.ru
-vim .env
+#vim .env
