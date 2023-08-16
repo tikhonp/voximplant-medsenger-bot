@@ -1,5 +1,7 @@
 sudo pip3 install -r requirements.txt
 
+export DJANGO_SETTINGS_MODULE=voximplant_medsenger_bot.settings.production
+
 python3 manage.py makemigrations
 python3 manage.py migrate
 python3 manage.py collectstatic
