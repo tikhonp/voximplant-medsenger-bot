@@ -14,7 +14,7 @@ from medsenger_agent import serializers
 from medsenger_agent.models import Contract
 
 MEDSENGER_APP_KEY = settings.MEDSENGER_APP_KEY
-DOMAIN = settings.DOMAIN
+HOST = settings.HOST
 
 
 class InitAPIView(CreateAPIView):
@@ -127,6 +127,6 @@ def settings(request):
     contract = get_object_or_404(Contract.objects.all(), contract_id=contract_id)
     return render(request, 'settings.html', {
         'contract_id': contract_id,
-        'base_url': DOMAIN,
+        'base_url': HOST,
         'agent_token': contract.agent_token,
     })

@@ -23,6 +23,8 @@ DEBUG = False
 #     profiles_sample_rate=1.0,
 # )
 
+HOST = 'https://voximplant.ai.medsenger.ru'
+
 CORS_ALLOWED_ORIGINS = [
     'https://voximplant.ai.medsenger.ru',
     'https://medsenger.ru',
@@ -36,8 +38,6 @@ CSRF_TRUSTED_ORIGINS = [
 ALLOWED_HOSTS = [
     'voximplant.ai.medsenger.ru',
 ]
-
-DOMAIN = 'https://voximplant.ai.medsenger.ru'
 
 DATABASES = {
     'default': {

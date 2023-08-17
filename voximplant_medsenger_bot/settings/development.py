@@ -4,6 +4,8 @@ from .base import *
 
 DEBUG = True
 
+HOST = 'http://127.0.0.1:8000'
+
 CORS_ALLOWED_ORIGINS = [
     'http://127.0.0.1',
     'http://localhost',
@@ -18,8 +20,6 @@ ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
 ]
-
-DOMAIN = 'http://127.0.0.1:8000'
 
 DATABASES = {
     'default': {
