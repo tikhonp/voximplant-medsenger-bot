@@ -98,6 +98,7 @@
                 let data = { time: `${this.timeHourSelected}:${this.timeMinuteSelected}` }
                 axios.post(url, data, {
                     params: { agent_token: agentToken },
+                    withCredentials: true,
                 })
                 .then((response) => {
                     this.fetchContract()
