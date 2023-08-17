@@ -32,7 +32,7 @@
     const baseUrl = "{{ base_url }}"
     const agentToken = "{{ agent_token }}"
 
-    axios.defaults.withCredentials = true
+    {#axios.defaults.withCredentials = true#}
     axios.defaults.headers.common['X-CSRFToken'] = '{{ csrf_token }}'
 
     const app = Vue.createApp({
