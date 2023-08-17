@@ -6,12 +6,7 @@ DEBUG = True
 
 HOST = 'http://127.0.0.1:8000'
 
-CORS_ALLOWED_ORIGINS = [
-    'http://127.0.0.1',
-    'http://localhost',
-]
-
-CSRF_TRUSTED_ORIGINS = [
+CORS_ALLOWED_ORIGINS = CSRF_TRUSTED_ORIGINS = [
     'http://127.0.0.1',
     'http://localhost',
 ]
@@ -28,4 +23,16 @@ DATABASES = {
     }
 }
 
-MEDSENGER_API_CLIENT = AgentApiClient(MEDSENGER_APP_KEY, MEDSENGER_MAIN_HOST, MEDSENGER_AGENT_ID, DEBUG, not DEBUG)
+REST_FRAMEWORK = {
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ]
+}
+
+MEDSENGER_API_CLIENT = AgentApiClient(
+    os.getenv('MEDSENGER_APP_KEY'),
+    os.getenv('MEDSENGER_MAIN_HOST'),
+    os.getenv('MEDSENGER_AGENT_ID'),
+    DEBUG, not DEBUG
+)

@@ -1,6 +1,4 @@
-import sentry_sdk
 from medsenger_api import AgentApiClient
-from sentry_sdk.integrations.django import DjangoIntegration
 
 from .base import *
 
@@ -25,12 +23,7 @@ DEBUG = False
 
 HOST = 'https://voximplant.ai.medsenger.ru'
 
-CORS_ALLOWED_ORIGINS = [
-    'https://voximplant.ai.medsenger.ru',
-    'https://medsenger.ru',
-]
-
-CSRF_TRUSTED_ORIGINS = [
+CORS_ALLOWED_ORIGINS = CSRF_TRUSTED_ORIGINS = [
     'https://voximplant.ai.medsenger.ru',
     'https://medsenger.ru',
 ]
@@ -56,4 +49,9 @@ REST_FRAMEWORK = {
     ]
 }
 
-MEDSENGER_API_CLIENT = AgentApiClient(MEDSENGER_APP_KEY, MEDSENGER_MAIN_HOST, MEDSENGER_AGENT_ID, DEBUG, not DEBUG)
+MEDSENGER_API_CLIENT = AgentApiClient(
+    os.getenv('MEDSENGER_APP_KEY'),
+    os.getenv('MEDSENGER_MAIN_HOST'),
+    os.getenv('MEDSENGER_AGENT_ID'),
+    DEBUG, not DEBUG
+)

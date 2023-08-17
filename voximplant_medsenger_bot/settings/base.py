@@ -12,17 +12,7 @@ dotenv_file = BASE_DIR.parent / ".env"
 if os.path.isfile(dotenv_file):
     load_dotenv(dotenv_file)
 
-SECRET_KEY = os.getenv(
-    'DJANGO_SECRET_KEY',
-    'django-insecure-lgztz$s5$c5$y)*_-5^&905pm5=4-1!la+a@ad*s=e-qxf#2+h',
-)
-
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = [
-    '127.0.0.1',
-]
+SECRET_KEY = os.getenv('DJANGO_SECRET_KEY')
 
 # Application definition
 
@@ -70,18 +60,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'voximplant_medsenger_bot.wsgi.application'
 
-# Database
-# https://docs.djangoproject.com/en/4.2/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 # Password validation
-# https://docs.djangoproject.com/en/4.2/ref/settings/#auth-password-validators
 
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -99,7 +78,6 @@ AUTH_PASSWORD_VALIDATORS = [
 ]
 
 # Internationalization
-# https://docs.djangoproject.com/en/4.2/topics/i18n/
 
 LANGUAGE_CODE = 'ru-ru'
 
@@ -109,9 +87,6 @@ USE_I18N = False
 
 USE_TZ = False
 
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/4.2/howto/static-files/
-
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
@@ -119,16 +94,14 @@ MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Default primary key field type
-# https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-MEDSENGER_APP_KEY = os.getenv('MEDSENGER_APP_KEY')
-MEDSENGER_AGENT_ID = os.getenv('MEDSENGER_AGENT_ID')
-MEDSENGER_MAIN_HOST = os.getenv('MEDSENGER_MAIN_HOST')
+# CSRF and CORS validation
+
+CSRF_COOKIE_SAMESITE = None
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
-CSRF_COOKIE_SAMESITE = None
 XS_SHARING_ALLOWED_METHODS = ['POST', 'GET', 'OPTIONS', 'PUT', 'DELETE']
 
 CORS_ORIGIN_ALLOW_ALL = False
@@ -139,14 +112,7 @@ CORS_ALLOW_HEADERS = (
     "csrftoken",
 )
 
-CSRF_COOKIE_NAME = "csrftoken"
-
-REST_FRAMEWORK = {
-    'DEFAULT_RENDERER_CLASSES': [
-        'rest_framework.renderers.JSONRenderer',
-        'rest_framework.renderers.BrowsableAPIRenderer',
-    ]
-}
+# Voximplant credentials
 
 VOXIMPLANT_ACCESS_TOKEN = os.getenv("VOXIMPLANT_ACCESS_TOKEN")
 VOXIMPLANT_ACCOUNT_NAME = os.getenv("VOXIMPLANT_ACCOUNT_NAME")
