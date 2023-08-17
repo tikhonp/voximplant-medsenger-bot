@@ -32,7 +32,6 @@
     const baseUrl = "{{ base_url }}"
     const agentToken = "{{ agent_token }}"
 
-    {#axios.defaults.withCredentials = true#}
     axios.defaults.headers.common['X-CSRFToken'] = '{{ csrf_token }}'
 
     const app = Vue.createApp({
@@ -68,7 +67,6 @@
                 axios.delete(url, {
                     params: { agent_token: agentToken },
                     data: { form_id: id },
-                    withCredentials: true,
                 })
                 .then((response) => {
                     this.fetchContract()
@@ -82,7 +80,6 @@
                 let data = { form_id: id }
                 axios.post(url, data, {
                     params: { agent_token: agentToken },
-                    withCredentials: true,
                 })
                 .then((response) => {
                     this.fetchContract()
@@ -97,7 +94,6 @@
                 let data = { time: `${this.timeHourSelected}:${this.timeMinuteSelected}` }
                 axios.post(url, data, {
                     params: { agent_token: agentToken },
-                    withCredentials: true,
                 })
                 .then((response) => {
                     this.fetchContract()
@@ -113,7 +109,6 @@
                 axios.delete(url, {
                     params: { agent_token: agentToken },
                     data: data,
-                    withCredentials: true,
                 })
                 .then((response) => {
                     this.fetchContract()
