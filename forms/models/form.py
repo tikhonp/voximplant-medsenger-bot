@@ -8,7 +8,7 @@ class Form(models.Model):
     voximplant_scenario_id = models.IntegerField()
     is_active = models.BooleanField(default=True)
 
-    contracts = models.ManyToManyField(Contract, related_name='forms')
+    contracts = models.ManyToManyField(Contract, related_name='forms', blank=True)
 
     class Meta:
         ordering = ['name']

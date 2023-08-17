@@ -77,7 +77,7 @@ class SettingsFormsUpdate(GenericAPIView):
 
     def delete(self, request):
         form_id, contract = self.process_request(request)
-        contract.form_set.remove(
+        contract.forms.remove(
             get_object_or_404(Form.objects.all(), id=form_id)
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
