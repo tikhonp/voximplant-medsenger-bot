@@ -32,11 +32,8 @@
     const baseUrl = "{{ base_url }}"
     const agentToken = "{{ agent_token }}"
 
-    axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
-    axios.defaults.xsrfCookieName = "csrftoken";
     axios.defaults.withCredentials = true
-
-    axios.defaults.headers.common['X-CSRFToken'] = '{% csrf_token %}'
+    axios.defaults.headers.common['X-CSRFToken'] = '{{ csrf_token }}'
 
     const app = Vue.createApp({
         delimiters: ['[[',']]'],
