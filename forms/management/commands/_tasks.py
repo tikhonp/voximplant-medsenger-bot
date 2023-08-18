@@ -1,8 +1,9 @@
 from datetime import datetime, timedelta, time
 
+from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import Q, QuerySet
 
-from forms.models import Call
+from forms.models import Call, Form
 from medsenger_agent.models import Contract
 
 
@@ -34,6 +35,22 @@ def check_current_calls():
         )
 
         for form in forms:
-            form.start_call(contract)
+            Call.start(contract, form)
 
     print("kek")
+
+
+def start_call(contract_id: int, form_id: int):
+    try:
+        contract = Contract.objects.get(contract_id=contract_id)
+    except ObjectDoesNotExist:
+        print(f"Failed to find contract with id: {contract_id}")
+        return
+
+    try:
+        form = Form.objects.get(id=form_id)
+    except ObjectDoesNotExist:
+        print(f"Failed to find form with id: {form_id}")
+        return
+
+    Call.start(contract, form)

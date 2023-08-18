@@ -9,6 +9,7 @@ PARAMS = {
     'domain': settings.VOXIMPLANT_ACCOUNT_NAME
 }
 BASE_URL = f"https://{settings.VOXIMPLANT_API_HOSTNAME}/api/v3"
+HOST = settings.HOST
 
 
 def run_scenario(scenario_id: int, phone: str, call_id: int, agent_token: str) -> bool:
@@ -22,6 +23,7 @@ def run_scenario(scenario_id: int, phone: str, call_id: int, agent_token: str) -
         'variables': json.dumps({
             'call_id': call_id,
             'agent_token': agent_token,
+            'host': HOST
         }),
         'caller_id': VOXIMPLANT_CALLER_ID
     }

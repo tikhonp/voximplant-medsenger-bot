@@ -1,10 +1,11 @@
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
-from rest_framework.generics import ListAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView
 
-from forms.models import Form
-from forms.serializers import FormSerializer
+from forms.models import Form, Call
+from forms.serializers import FormSerializer, UpdateCallSerializer
+from utils.agent_token_permission import AgentTokenPermission
 
 
 class FormList(ListAPIView):
@@ -12,6 +13,15 @@ class FormList(ListAPIView):
 
     queryset = Form.objects.filter(is_active=True)
     serializer_class = FormSerializer
+    permission_classes = [AgentTokenPermission]
+    authentication_classes = []
+
+
+class UpdateCall(UpdateAPIView):
+    serializer_class = UpdateCallSerializer
+    queryset = Call.objects.all()
+    permission_classes = [AgentTokenPermission]
+    authentication_classes = []
 
 
 @csrf_exempt

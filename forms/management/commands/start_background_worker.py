@@ -5,7 +5,7 @@ from django.core.management.base import BaseCommand
 
 from forms.management.commands._tasks import check_current_calls
 
-REPEAT_DELAY_SECONDS = 5
+REPEAT_DELAY_SECONDS = 60
 
 
 class Command(BaseCommand):

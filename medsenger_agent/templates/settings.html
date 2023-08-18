@@ -120,7 +120,7 @@
             },
             fetchForms() {
                 let url = `${baseUrl}/forms/`
-                axios.get(url)
+                axios.get(url, { params: { agent_token: agentToken } })
                 .then((response) => {
                     this.forms = response.data
                 })

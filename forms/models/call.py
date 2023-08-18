@@ -13,11 +13,13 @@ class Call(models.Model):
         CREATED = 'CREATED'
         SUCCESS = 'SUCCESS'
         RUN_SCENARIO_FAILED = 'RUN_SCENARIO_FAILED'
+        FAILED_OUTBOUND_CALL = 'FAILED_OUTBOUND_CALL'
+        VOICEMAIL_DETECTED = 'VOICEMAIL_DETECTED'
 
     form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name='call_set')
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='call_set')
 
-    state = models.CharField(max_length=19, choices=State.choices)
+    state = models.CharField(max_length=20, choices=State.choices)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
