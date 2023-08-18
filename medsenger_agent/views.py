@@ -5,9 +5,8 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, render
 from django.views.decorators.http import require_http_methods
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, GenericAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView
 from rest_framework.response import Response
-from rest_framework.views import APIView
 
 from forms.models import Form, TimeSlot
 from medsenger_agent import serializers
@@ -37,7 +36,7 @@ class RemoveContractAPIView(GenericAPIView):
         instance.is_active = False
         instance.save()
 
-        return HttpResponse('ok')
+        return HttpResponse("ok")
 
 
 class StatusAPIView(GenericAPIView):
@@ -47,9 +46,11 @@ class StatusAPIView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-
-        data = {'is_tracking_data': True, 'supported_scenarios': [],
-                'tracked_contracts': [i.contract_id for i in self.get_queryset().filter(is_active=True)]}
+        data = {
+            'is_tracking_data': True,
+            'supported_scenarios': [],
+            'tracked_contracts': [i.contract_id for i in self.get_queryset().filter(is_active=True)]
+        }
         return Response(data)
 
 
@@ -63,7 +64,7 @@ class SettingsFormsUpdate(GenericAPIView):
 
         instance = get_object_or_404(
             self.get_queryset(),
-            agent_token=request.query_params.get("agent_token")
+            agent_token=request.query_params.get('agent_token')
         )
 
         return serializer.data['form_id'], instance
@@ -93,7 +94,7 @@ class SettingsTimeSlotsUpdate(GenericAPIView):
 
         instance = get_object_or_404(
             self.get_queryset(),
-            agent_token=request.query_params.get("agent_token")
+            agent_token=request.query_params.get('agent_token')
         )
 
         return serializer.data['time'], instance
@@ -109,14 +110,12 @@ class SettingsTimeSlotsUpdate(GenericAPIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ContractDetail(APIView):
-    def get(self, request):
-        contract = get_object_or_404(
-            Contract.objects.all(),
-            agent_token=request.query_params.get("agent_token")
-        )
-        serializer = serializers.ContractSerializer(contract)
-        return Response(serializer.data)
+class ContractDetail(RetrieveAPIView):
+    queryset = Contract.objects.all()
+    serializer_class = serializers.ContractSerializer
+
+    def get_object(self):
+        return get_object_or_404(self.get_queryset(), agent_token=self.request.query_params.get('agent_token'))
 
 
 @require_http_methods(['GET'])
