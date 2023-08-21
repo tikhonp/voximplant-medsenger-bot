@@ -1,10 +1,13 @@
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
-from rest_framework import status
-from rest_framework.generics import ListAPIView, UpdateAPIView
+from datetime import datetime
 
-from forms.models import Form, Call
+from django.shortcuts import get_object_or_404
+from rest_framework.generics import ListAPIView, UpdateAPIView
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from forms.models import Form, Call, TimeSlot
 from forms.serializers import FormSerializer, UpdateCallSerializer
+from medsenger_agent.models import Contract
 from utils.agent_token_permission import AgentTokenPermission
 
 
@@ -18,13 +21,27 @@ class FormList(ListAPIView):
 
 
 class UpdateCall(UpdateAPIView):
-    serializer_class = UpdateCallSerializer
+    """Update call from voximplant scenario."""
+
     queryset = Call.objects.all()
+    serializer_class = UpdateCallSerializer
     permission_classes = [AgentTokenPermission]
     authentication_classes = []
 
 
-@csrf_exempt
-def call(request):
-    print(request.body)
-    return HttpResponse(status=status.HTTP_204_NO_CONTENT)
+class GetNextTimeSlot(APIView):
+    """
+    Get next available time slot for contract and get time 'HH:MM:SS' and is_tomorrow flag.
+    Note: that `agent_token` must be provided
+    """
+
+    def get(self, request):
+        contract = get_object_or_404(
+            Contract.objects.all(),
+            agent_token=request.query_params.get('agent_token')
+        )
+        time, is_tomorrow = TimeSlot.get_next_timeslot(datetime.now(), contract=contract)
+        return Response({
+            'time': time,
+            'is_tomorrow': is_tomorrow
+        })

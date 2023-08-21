@@ -16,3 +16,4 @@ class TimeSlotAdmin(admin.ModelAdmin):
 @admin.register(models.Call)
 class CallAdmin(admin.ModelAdmin):
     list_display = ('form', 'state', 'created_at', 'contract')
+    readonly_fields = ('created_at', 'updated_at')

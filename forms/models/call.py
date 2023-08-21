@@ -15,6 +15,7 @@ class Call(models.Model):
         RUN_SCENARIO_FAILED = 'RUN_SCENARIO_FAILED'
         FAILED_OUTBOUND_CALL = 'FAILED_OUTBOUND_CALL'
         VOICEMAIL_DETECTED = 'VOICEMAIL_DETECTED'
+        DENIED_BY_USER = 'DENIED_BY_USER'
 
     form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name='call_set')
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='call_set')
