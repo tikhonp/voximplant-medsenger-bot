@@ -1,5 +1,6 @@
 from django.conf import settings
 from rest_framework import serializers
+from rest_framework.exceptions import PermissionDenied
 
 
 class ApiKeyField(serializers.CharField):
@@ -7,6 +8,6 @@ class ApiKeyField(serializers.CharField):
 
     def to_internal_value(self, data):
         value = super().to_internal_value(data)
-        if value != settings.APP_KEY:
-            raise serializers.ValidationError('Invalid API key.')
+        if value != settings.MEDSENGER_APP_KEY:
+            raise PermissionDenied('Invalid API key.')
         return value

@@ -4,9 +4,15 @@ from forms.models import Form, TimeSlot, Call
 
 
 class FormSerializer(serializers.ModelSerializer):
+    scenario_id = serializers.IntegerField()
+
     class Meta:
         model = Form
-        fields = ['id', 'name']
+        fields = ['scenario_id', 'name']
+        extra_kwargs = {
+            'scenario_id': {'required': True},
+            'name': {'required': False, 'allow_blank': True}
+        }
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):

@@ -5,7 +5,7 @@ from forms import models
 
 @admin.register(models.Form)
 class FormAdmin(admin.ModelAdmin):
-    list_display = ('name', 'voximplant_scenario_id', 'is_active')
+    list_display = ('name', 'scenario_id', 'is_active')
 
 
 @admin.register(models.TimeSlot)

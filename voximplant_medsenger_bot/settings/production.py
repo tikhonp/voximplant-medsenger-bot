@@ -51,7 +51,8 @@ REST_FRAMEWORK = {
 
 MEDSENGER_API_CLIENT = AgentApiClient(
     os.getenv('MEDSENGER_APP_KEY'),
-    os.getenv('MEDSENGER_MAIN_HOST'),
-    os.getenv('MEDSENGER_AGENT_ID'),
-    DEBUG, not DEBUG
+    host=os.getenv('MEDSENGER_MAIN_HOST'),
+    agent_id=os.getenv('MEDSENGER_AGENT_ID'),
+    debug=DEBUG,
+    use_grpc=not DEBUG
 )

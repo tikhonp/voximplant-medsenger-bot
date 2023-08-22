@@ -51,72 +51,71 @@
         methods: {
             fetchContract() {
                 this.contractDataLoading = true
-                let url = `${baseUrl}/medsenger/settings/contract/`
-                axios.get(url, { params: { agent_token: agentToken } })
+
+                let url_forms = `${baseUrl}/medsenger/settings/contract/forms/`
+                axios.get(url_forms, { params: { agent_token: agentToken } })
                     .then((response) => {
-                        this.connectedForms = response.data.forms
-                        this.timeSlots = response.data.time_slots
+                        this.connectedForms = response.data
+                        this.contractDataLoading = false
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+
+                let url_time_slots = `${baseUrl}/medsenger/settings/contract/time_slots/`
+                axios.get(url_time_slots, { params: { agent_token: agentToken } })
+                    .then((response) => {
+                        this.timeSlots = response.data
                         this.contractDataLoading = false
                     })
                     .catch((error) => {
                         console.log(error)
                     })
             },
-            deleteForm(id) {
-                let url = `${baseUrl}/medsenger/settings/forms/`
-                axios.delete(url, {
-                    params: { agent_token: agentToken },
-                    data: { form_id: id },
-                })
-                .then((response) => {
-                    this.fetchContract()
-                })
-                .catch((error) => {
-                    console.log(error)
-                })
+            deleteForm(scenario_id) {
+                let url = `${baseUrl}/medsenger/settings/contract/forms/${scenario_id}/`
+                axios.delete(url, { params: { agent_token: agentToken } })
+                    .then((response) => {
+                        this.fetchContract()
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
             },
-            addForm(id) {
-                let url = `${baseUrl}/medsenger/settings/forms/`
-                let data = { form_id: id }
-                axios.post(url, data, {
-                    params: { agent_token: agentToken },
-                })
-                .then((response) => {
-                    this.fetchContract()
-                    $('#addContractModal').modal('hide')
-                })
-                .catch((error) => {
-                    console.log(error)
-                })
+            addForm(scenario_id) {
+                let url_forms = `${baseUrl}/medsenger/settings/contract/forms/`
+                let data = { scenario_id: scenario_id }
+                axios.post(url_forms, data, { params: { agent_token: agentToken } })
+                    .then((response) => {
+                        this.fetchContract()
+                        $('#addContractModal').modal('hide')
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
             },
             addTimeSlot() {
-                let url = `${baseUrl}/medsenger/settings/time_slots/`
+                let url = `${baseUrl}/medsenger/settings/contract/time_slots/`
                 let data = { time: `${this.timeHourSelected}:${this.timeMinuteSelected}` }
-                axios.post(url, data, {
-                    params: { agent_token: agentToken },
-                })
-                .then((response) => {
-                    this.fetchContract()
-                    $('#AddTimeSlot').modal('hide')
-                })
-                .catch((error) => {
-                    console.log(error)
-                })
+                axios.post(url, data, { params: { agent_token: agentToken } })
+                    .then((response) => {
+                        this.fetchContract()
+                        $('#AddTimeSlot').modal('hide')
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
             },
-            removeTimeSlot(time) {
-                let url = `${baseUrl}/medsenger/settings/time_slots/`
-                let data = { time: this.formatTimeSlotTime(time) }
-                axios.delete(url, {
-                    params: { agent_token: agentToken },
-                    data: data,
-                })
-                .then((response) => {
-                    this.fetchContract()
-                    $('#AddTimeSlot').modal('hide')
-                })
-                .catch((error) => {
-                    console.log(error)
-                })
+            removeTimeSlot(id) {
+                let url = `${baseUrl}/medsenger/settings/contract/time_slots/${id}/`
+                axios.delete(url, { params: { agent_token: agentToken } })
+                    .then((response) => {
+                        this.fetchContract()
+                        $('#AddTimeSlot').modal('hide')
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
             },
             fetchForms() {
                 let url = `${baseUrl}/forms/`
@@ -149,7 +148,7 @@
                 <div class="list-group">
                     <div v-for="form in connectedForms" class="list-group-item d-flex justify-content-between align-items-center">
                         [[ form.name ]]
-                    <button type="button" class="btn btn-danger" @click="deleteForm(form.id)">Удалить</button>
+                    <button type="button" class="btn btn-danger" @click="deleteForm(form.scenario_id)">Удалить</button>
                     </div>
                     <button type="button" class="list-group-item list-group-item-action active"
                             aria-current="true" data-bs-toggle="modal" data-bs-target="#addContractModal"
@@ -162,7 +161,7 @@
                 <div class="list-group">
                     <div v-for="timeSlot in timeSlots" class="list-group-item d-flex justify-content-between align-items-center">
                         [[ formatTimeSlotTime(timeSlot.time) ]]
-                    <button type="button" class="btn btn-danger" @click="removeTimeSlot(timeSlot.time)">Удалить</button>
+                    <button type="button" class="btn btn-danger" @click="removeTimeSlot(timeSlot.id)">Удалить</button>
                     </div>
                     <button type="button" class="list-group-item list-group-item-action active"
                             aria-current="true" data-bs-toggle="modal" data-bs-target="#AddTimeSlot">
@@ -215,7 +214,7 @@
                         <div class="modal-body">
                             <div class="list-group">
                                 <button v-for="form in forms" type="button" class="list-group-item list-group-item-action active"
-                                        aria-current="true" @click="addForm(form.id)">
+                                        aria-current="true" @click="addForm(form.scenario_id)">
                                     Добавить: [[ form.name ]]
                                 </button>
                             </div>

@@ -1,1 +1,1 @@
-from utils.serializer_fields.TimestampField import TimestampField
+from utils.serializer_fields.timestamp_field import TimestampField

@@ -26,7 +26,7 @@ class Call(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def run_scenario(self):
-        if not run_scenario(self.form.voximplant_scenario_id, self.contract.phone, self.id, self.contract.agent_token):
+        if not run_scenario(self.form.scenario_id, self.contract.phone, self.id, self.contract.agent_token):
             self.state = Call.State.RUN_SCENARIO_FAILED
             self.save()
 

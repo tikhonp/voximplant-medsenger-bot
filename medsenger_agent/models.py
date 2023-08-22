@@ -1,8 +1,5 @@
 from django.conf import settings
 from django.db import models
-from medsenger_api import AgentApiClient
-
-MEDSENGER_API_CLIENT: AgentApiClient = settings.MEDSENGER_API_CLIENT
 
 
 class Contract(models.Model):
@@ -20,11 +17,11 @@ class Contract(models.Model):
         return "Contract ({})".format(self.contract_id)
 
     def save(self, *args, **kwargs):
-        metadata = MEDSENGER_API_CLIENT.get_patient_info(self.contract_id)
+        metadata = settings.MEDSENGER_API_CLIENT.get_patient_info(self.contract_id)
         self.patient_name = metadata.get('name', '')
         self.patient_email = metadata.get('email')
         self.patient_sex = metadata.get('sex')
         self.phone = metadata.get('phone')
-        agent_token = MEDSENGER_API_CLIENT.get_agent_token(self.contract_id)
+        agent_token = settings.MEDSENGER_API_CLIENT.get_agent_token(self.contract_id)
         self.agent_token = agent_token.get('agent_token', '')
         super().save(*args, **kwargs)

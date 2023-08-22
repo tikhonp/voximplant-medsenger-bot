@@ -1,12 +1,14 @@
 from rest_framework import serializers
 
-from forms.serializers import FormSerializer, TimeSlotSerializer
 from medsenger_agent.models import Contract
-from utils.serializer_fields import ApiKeyField
+from utils.serializer_fields.api_key_field import ApiKeyField
 
 
-class ContractCreateSerializer(serializers.Serializer):
-    api_key = ApiKeyField
+class ApiKeyBodySerializer(serializers.Serializer):
+    api_key = ApiKeyField()
+
+
+class ContractCreateSerializer(ApiKeyBodySerializer):
     contract_id = serializers.IntegerField()
 
     def save(self):
@@ -19,24 +21,5 @@ class ContractCreateSerializer(serializers.Serializer):
         return instance
 
 
-class ContractRemoveSerializer(serializers.Serializer):
-    api_key = ApiKeyField
+class ContractRemoveSerializer(ApiKeyBodySerializer):
     contract_id = serializers.IntegerField()
-
-
-class StatusSerializer(serializers.Serializer):
-    api_key = ApiKeyField
-
-
-class SettingsFormSerializer(serializers.Serializer):
-    form_id = serializers.IntegerField()
-
-
-class SettingsTimeSlotSerializer(serializers.Serializer):
-    time = serializers.TimeField()
-
-
-class ContractSerializer(serializers.Serializer):
-    contract_id = serializers.IntegerField()
-    forms = serializers.ListSerializer(child=FormSerializer())
-    time_slots = serializers.ListSerializer(child=TimeSlotSerializer(), source='time_slot_set')

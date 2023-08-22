@@ -12,7 +12,11 @@ from utils.agent_token_permission import AgentTokenPermission
 
 
 class FormList(ListAPIView):
-    """List of all forms for settings page."""
+    """
+    List of all forms for settings page.
+
+    Note: that `agent_token` must be provided
+    """
 
     queryset = Form.objects.filter(is_active=True)
     serializer_class = FormSerializer
@@ -21,7 +25,11 @@ class FormList(ListAPIView):
 
 
 class UpdateCall(UpdateAPIView):
-    """Update call from voximplant scenario."""
+    """
+    Update call from voximplant scenario.
+
+    Note: that `agent_token` must be provided
+    """
 
     queryset = Call.objects.all()
     serializer_class = UpdateCallSerializer
@@ -31,17 +39,12 @@ class UpdateCall(UpdateAPIView):
 
 class GetNextTimeSlot(APIView):
     """
-    Get next available time slot for contract and get time 'HH:MM:SS' and is_tomorrow flag.
+    Get next available time slot for contract and get time (`HH:MM:SS`) and `is_tomorrow` flag.
+
     Note: that `agent_token` must be provided
     """
 
     def get(self, request):
-        contract = get_object_or_404(
-            Contract.objects.all(),
-            agent_token=request.query_params.get('agent_token')
-        )
+        contract = get_object_or_404(Contract.objects.all(), agent_token=request.query_params.get('agent_token'))
         time, is_tomorrow = TimeSlot.get_next_timeslot(datetime.now(), contract=contract)
-        return Response({
-            'time': time,
-            'is_tomorrow': is_tomorrow
-        })
+        return Response({'time': time, 'is_tomorrow': is_tomorrow})

@@ -1,22 +1,20 @@
-from datetime import time
-
 from django.conf import settings
 from django.http import HttpResponse
-from django.shortcuts import get_object_or_404, render
-from django.views.decorators.http import require_http_methods
-from rest_framework import status
-from rest_framework.generics import CreateAPIView, GenericAPIView, RetrieveAPIView
+from django.shortcuts import get_object_or_404
+from rest_framework.generics import CreateAPIView, GenericAPIView, ListCreateAPIView, \
+    RetrieveDestroyAPIView
+from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
 from forms.models import Form, TimeSlot
+from forms.serializers import TimeSlotSerializer, FormSerializer
 from medsenger_agent import serializers
 from medsenger_agent.models import Contract
-
-MEDSENGER_APP_KEY = settings.MEDSENGER_APP_KEY
-HOST = settings.HOST
+from utils.api_key_permission import ApiKeyPermission
 
 
-class InitAPIView(CreateAPIView):
+class MedsengerAgentInitView(CreateAPIView):
     serializer_class = serializers.ContractCreateSerializer
 
     def post(self, request, *args, **kwargs):
@@ -24,7 +22,7 @@ class InitAPIView(CreateAPIView):
         return HttpResponse("ok")
 
 
-class RemoveContractAPIView(GenericAPIView):
+class MedsengerAgentRemoveContractView(GenericAPIView):
     serializer_class = serializers.ContractRemoveSerializer
     queryset = Contract.objects.all()
 
@@ -39,8 +37,8 @@ class RemoveContractAPIView(GenericAPIView):
         return HttpResponse("ok")
 
 
-class StatusAPIView(GenericAPIView):
-    serializer_class = serializers.StatusSerializer
+class MedsengerAgentStatusView(GenericAPIView):
+    serializer_class = serializers.ApiKeyBodySerializer
     queryset = Contract.objects.all()
 
     def post(self, request):
@@ -54,78 +52,116 @@ class StatusAPIView(GenericAPIView):
         return Response(data)
 
 
-class SettingsFormsUpdate(GenericAPIView):
-    serializer_class = serializers.SettingsFormSerializer
-    queryset = Contract.objects.all()
+class MedsengerAgentSettingsView(APIView):
+    """
+    Medsenger agent /settings page.
 
-    def process_request(self, request) -> (int, Contract):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
+    Requires `api_key` and `contract_id` query params.
+    """
 
-        instance = get_object_or_404(
-            self.get_queryset(),
-            agent_token=request.query_params.get('agent_token')
+    renderer_classes = [TemplateHTMLRenderer]
+    template_name = 'settings.html'
+    permission_classes = [ApiKeyPermission]
+    authentication_classes = []
+
+    def get(self, request):
+        contract_id = request.GET.get('contract_id')
+        contract = get_object_or_404(Contract.objects.all(), contract_id=contract_id)
+        return Response({
+            'contract_id': contract_id,
+            'base_url': settings.HOST,
+            'agent_token': contract.agent_token,
+        })
+
+
+class ContractFormsView(ListCreateAPIView):
+    """
+    Get list of forms for contract or add new form to contract.
+
+    Note: that `agent_token` must be provided
+    """
+
+    serializer_class = FormSerializer
+
+    def get_queryset(self):
+        contract = get_object_or_404(
+            Contract.objects.all(),
+            agent_token=self.request.query_params.get('agent_token')
         )
+        return Form.objects.filter(contracts=contract)
 
-        return serializer.data['form_id'], instance
-
-    def post(self, request):
-        form_id, contract = self.process_request(request)
+    def perform_create(self, serializer):
+        contract = get_object_or_404(
+            Contract.objects.all(),
+            agent_token=self.request.query_params.get('agent_token')
+        )
         contract.forms.add(
-            get_object_or_404(Form.objects.all(), id=form_id)
-        )
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-    def delete(self, request):
-        form_id, contract = self.process_request(request)
-        contract.forms.remove(
-            get_object_or_404(Form.objects.all(), id=form_id)
-        )
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-
-class SettingsTimeSlotsUpdate(GenericAPIView):
-    serializer_class = serializers.SettingsTimeSlotSerializer
-    queryset = Contract.objects.all()
-
-    def process_request(self, request) -> (time, Contract):
-        serializer = self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-
-        instance = get_object_or_404(
-            self.get_queryset(),
-            agent_token=request.query_params.get('agent_token')
+            get_object_or_404(Form.objects.all(), scenario_id=serializer.data.get('scenario_id'))
         )
 
-        return serializer.data['time'], instance
 
-    def post(self, request):
-        time_data, contract = self.process_request(request)
-        time_slot, _ = TimeSlot.objects.get_or_create(time=time_data, contract=contract)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+class ContractFormDetailView(RetrieveDestroyAPIView):
+    """
+    Get form by id or delete relation from contract.
 
-    def delete(self, request):
-        time_data, contract = self.process_request(request)
-        contract.time_slot_set.filter(time=time_data).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+    Note: that `agent_token` must be provided
+    """
+
+    serializer_class = FormSerializer
+
+    def get_queryset(self):
+        return Form.objects.filter(
+            contracts=get_object_or_404(
+                Contract.objects.all(),
+                agent_token=self.request.query_params.get('agent_token')
+            )
+        )
+
+    def perform_destroy(self, instance):
+        instance.contracts.remove(
+            get_object_or_404(
+                Contract.objects.all(),
+                agent_token=self.request.query_params.get('agent_token')
+            )
+        )
 
 
-class ContractDetail(RetrieveAPIView):
-    queryset = Contract.objects.all()
-    serializer_class = serializers.ContractSerializer
+class ContractTimeSlotsView(ListCreateAPIView):
+    """
+    Get list of contract related time slots or add time slot to contract.
 
-    def get_object(self):
-        return get_object_or_404(self.get_queryset(), agent_token=self.request.query_params.get('agent_token'))
+    Note: that `agent_token` must be provided
+    """
+
+    serializer_class = TimeSlotSerializer
+
+    def get_queryset(self):
+        contract = get_object_or_404(
+            Contract.objects.all(),
+            agent_token=self.request.query_params.get('agent_token')
+        )
+        return TimeSlot.objects.filter(contract=contract)
+
+    def perform_create(self, serializer):
+        contract = get_object_or_404(
+            Contract.objects.all(),
+            agent_token=self.request.query_params.get('agent_token')
+        )
+        TimeSlot.objects.get_or_create(time=serializer.data['time'], contract=contract)
 
 
-@require_http_methods(['GET'])
-def settings(request):
-    if request.GET.get('api_key', '') != MEDSENGER_APP_KEY:
-        return HttpResponse('"invalid key"', content_type='application/json', status=status.HTTP_401_UNAUTHORIZED)
-    contract_id = request.GET.get('contract_id')
-    contract = get_object_or_404(Contract.objects.all(), contract_id=contract_id)
-    return render(request, 'settings.html', {
-        'contract_id': contract_id,
-        'base_url': HOST,
-        'agent_token': contract.agent_token,
-    })
+class ContractTimeSlotDetailView(RetrieveDestroyAPIView):
+    """
+    Get time slot by id or delete it.
+
+    Note: that `agent_token` must be provided
+    """
+
+    serializer_class = TimeSlotSerializer
+
+    def get_queryset(self):
+        contract = get_object_or_404(
+            Contract.objects.all(),
+            agent_token=self.request.query_params.get('agent_token')
+        )
+        return TimeSlot.objects.filter(contract=contract)
