@@ -29,13 +29,13 @@ class Call(models.Model):
         return f"Call(form={self.form.scenario_id}, contract={self.contract.contract_id}, state={self.state})"
 
     def run_scenario(self):
-        if not run_scenario(self.form.scenario_id, self.contract.phone, self.id, self.contract.agent_token):
+        if not run_scenario(self.form.scenario_id, self.contract.patient_phone, self.id, self.contract.agent_token):
             self.state = Call.State.RUN_SCENARIO_FAILED
             self.save()
 
     @staticmethod
     def start(contract: Contract, form: Form) -> Call:
-        if contract.phone is None:
+        if contract.patient_phone is None:
             call = Call(form=form, contract=contract, state=Call.State.PHONE_IS_NONE)
             call.save()
             return call
