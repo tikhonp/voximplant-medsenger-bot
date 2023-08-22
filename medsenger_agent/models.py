@@ -11,7 +11,7 @@ class Contract(models.Model):
     patient_name = models.CharField(max_length=255)
     patient_email = models.EmailField(null=True, default=None)
     patient_sex = models.CharField(max_length=20)
-    patient_phone = models.CharField(max_length=11, null=True, default=None)
+    patient_phone = models.CharField(max_length=12, null=True, default=None)
 
     def __str__(self):
         return "Contract ({})".format(self.contract_id)

@@ -1,7 +1,7 @@
 from datetime import datetime
 
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import ListAPIView, UpdateAPIView
+from rest_framework.generics import ListAPIView, UpdateAPIView, RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -24,7 +24,7 @@ class FormList(ListAPIView):
     authentication_classes = []
 
 
-class UpdateCall(UpdateAPIView):
+class RetrieveUpdateCall(RetrieveUpdateAPIView):
     """
     Update call from voximplant scenario.
 

@@ -48,9 +48,10 @@ def start_call(contract_id: int, form_id: int):
         return
 
     try:
-        form = Form.objects.get(id=form_id)
+        form = Form.objects.get(scenario_id=form_id)
     except ObjectDoesNotExist:
         print(f"Failed to find form with id: {form_id}")
         return
 
-    Call.start(contract, form)
+    call = Call.start(contract, form)
+    print(f"Started: {call}")
