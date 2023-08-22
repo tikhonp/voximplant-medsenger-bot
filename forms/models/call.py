@@ -26,7 +26,8 @@ class Call(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
-        return f"Call(form={self.form.scenario_id}, contract={self.contract.contract_id}, state={self.state})"
+        return (f"Call(id={self.id}, form={self.form.scenario_id}, "
+                f"contract={self.contract.contract_id}, state={self.state})")
 
     def run_scenario(self):
         if not run_scenario(self.form.scenario_id, self.contract.patient_phone, self.id, self.contract.agent_token):
