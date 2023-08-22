@@ -29,4 +29,7 @@ def run_scenario(scenario_id: int, phone: str, call_id: int, agent_token: str) -
     }
 
     answer = requests.post(url, params=PARAMS, data=data).json()
-    return answer.get('success', False)
+    result = answer.get('success', False)
+    if not result:
+        print(f"run_scenario failed: {answer}")
+    return result
