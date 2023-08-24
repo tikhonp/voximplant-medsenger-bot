@@ -3,6 +3,8 @@ from django.db import models
 
 
 class Contract(models.Model):
+    """Medsenger contract. Create on agent /init and persist during agent lifecycle."""
+
     contract_id = models.IntegerField(unique=True, primary_key=True)
 
     is_active = models.BooleanField(default=True)
@@ -23,5 +25,5 @@ class Contract(models.Model):
         self.patient_sex = metadata.get('sex')
         self.phone = metadata.get('phone')
         agent_token = settings.MEDSENGER_API_CLIENT.get_agent_token(self.contract_id)
-        self.agent_token = agent_token.get('agent_token', '')
+        self.agent_token = agent_token.get('agent_token', '') if agent_token is not None else ''
         super().save(*args, **kwargs)

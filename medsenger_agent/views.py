@@ -2,20 +2,21 @@ from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework.generics import CreateAPIView, GenericAPIView, ListCreateAPIView, \
-    RetrieveDestroyAPIView
+    RetrieveDestroyAPIView, ListAPIView
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from forms.models import Form, TimeSlot
-from forms.serializers import TimeSlotSerializer, FormSerializer
-from medsenger_agent import serializers
+from forms.models import Form, TimeSlot, Call
+from forms.serializers import TimeSlotSerializer, FormSerializer, CallSerializer
 from medsenger_agent.models import Contract
-from utils.api_key_permission import ApiKeyPermission
+from medsenger_agent.serializers import ContractSerializer, ApiKeyBodySerializer
+from utils.contract_by_agent_token_mixin import ContractByAgentTokenMixin
+from utils.drf_permissions.api_key_permission import ApiKeyPermission
 
 
 class MedsengerAgentInitView(CreateAPIView):
-    serializer_class = serializers.ContractCreateSerializer
+    serializer_class = ContractSerializer
 
     def post(self, request, *args, **kwargs):
         self.create(request, *args, **kwargs)
@@ -23,7 +24,7 @@ class MedsengerAgentInitView(CreateAPIView):
 
 
 class MedsengerAgentRemoveContractView(GenericAPIView):
-    serializer_class = serializers.ContractRemoveSerializer
+    serializer_class = ContractSerializer
     queryset = Contract.objects.all()
 
     def post(self, request):
@@ -38,7 +39,7 @@ class MedsengerAgentRemoveContractView(GenericAPIView):
 
 
 class MedsengerAgentStatusView(GenericAPIView):
-    serializer_class = serializers.ApiKeyBodySerializer
+    serializer_class = ApiKeyBodySerializer
     queryset = Contract.objects.all()
 
     def post(self, request):
@@ -74,7 +75,7 @@ class MedsengerAgentSettingsView(APIView):
         })
 
 
-class ContractFormsView(ListCreateAPIView):
+class ContractFormsView(ListCreateAPIView, ContractByAgentTokenMixin):
     """
     Get list of forms for contract or add new form to contract.
 
@@ -84,23 +85,15 @@ class ContractFormsView(ListCreateAPIView):
     serializer_class = FormSerializer
 
     def get_queryset(self):
-        contract = get_object_or_404(
-            Contract.objects.all(),
-            agent_token=self.request.query_params.get('agent_token')
-        )
-        return Form.objects.filter(contracts=contract)
+        return Form.objects.filter(contracts=self.get_contract())
 
     def perform_create(self, serializer):
-        contract = get_object_or_404(
-            Contract.objects.all(),
-            agent_token=self.request.query_params.get('agent_token')
-        )
-        contract.forms.add(
+        self.get_contract().forms.add(
             get_object_or_404(Form.objects.all(), scenario_id=serializer.data.get('scenario_id'))
         )
 
 
-class ContractFormDetailView(RetrieveDestroyAPIView):
+class ContractFormDetailView(RetrieveDestroyAPIView, ContractByAgentTokenMixin):
     """
     Get form by id or delete relation from contract.
 
@@ -110,23 +103,13 @@ class ContractFormDetailView(RetrieveDestroyAPIView):
     serializer_class = FormSerializer
 
     def get_queryset(self):
-        return Form.objects.filter(
-            contracts=get_object_or_404(
-                Contract.objects.all(),
-                agent_token=self.request.query_params.get('agent_token')
-            )
-        )
+        return Form.objects.filter(contracts=self.get_contract())
 
     def perform_destroy(self, instance):
-        instance.contracts.remove(
-            get_object_or_404(
-                Contract.objects.all(),
-                agent_token=self.request.query_params.get('agent_token')
-            )
-        )
+        instance.contracts.remove(self.get_contract())
 
 
-class ContractTimeSlotsView(ListCreateAPIView):
+class ContractTimeSlotsView(ListCreateAPIView, ContractByAgentTokenMixin):
     """
     Get list of contract related time slots or add time slot to contract.
 
@@ -136,21 +119,13 @@ class ContractTimeSlotsView(ListCreateAPIView):
     serializer_class = TimeSlotSerializer
 
     def get_queryset(self):
-        contract = get_object_or_404(
-            Contract.objects.all(),
-            agent_token=self.request.query_params.get('agent_token')
-        )
-        return TimeSlot.objects.filter(contract=contract)
+        return TimeSlot.objects.filter(contract=self.get_contract())
 
     def perform_create(self, serializer):
-        contract = get_object_or_404(
-            Contract.objects.all(),
-            agent_token=self.request.query_params.get('agent_token')
-        )
-        TimeSlot.objects.get_or_create(time=serializer.data['time'], contract=contract)
+        TimeSlot.objects.get_or_create(time=serializer.data['time'], contract=self.get_contract())
 
 
-class ContractTimeSlotDetailView(RetrieveDestroyAPIView):
+class ContractTimeSlotDetailView(RetrieveDestroyAPIView, ContractByAgentTokenMixin):
     """
     Get time slot by id or delete it.
 
@@ -160,8 +135,17 @@ class ContractTimeSlotDetailView(RetrieveDestroyAPIView):
     serializer_class = TimeSlotSerializer
 
     def get_queryset(self):
-        contract = get_object_or_404(
-            Contract.objects.all(),
-            agent_token=self.request.query_params.get('agent_token')
-        )
-        return TimeSlot.objects.filter(contract=contract)
+        return TimeSlot.objects.filter(contract=self.get_contract())
+
+
+class ContractCallsView(ListAPIView, ContractByAgentTokenMixin):
+    """
+    Get list of call related to contract
+
+    Note: that `agent_token` must be provided
+    """
+
+    serializer_class = CallSerializer
+
+    def get_queryset(self):
+        return Call.objects.filter(contract=self.get_contract()).select_related('form')

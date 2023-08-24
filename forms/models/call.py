@@ -8,6 +8,8 @@ from utils.voximplant import run_scenario
 
 
 class Call(models.Model):
+    """All information about single call, updates by voximplant during call."""
+
     class State(models.TextChoices):
         PHONE_IS_NONE = 'PHONE_IS_NONE'
         CREATED = 'CREATED'
@@ -16,14 +18,18 @@ class Call(models.Model):
         FAILED_OUTBOUND_CALL = 'FAILED_OUTBOUND_CALL'
         VOICEMAIL_DETECTED = 'VOICEMAIL_DETECTED'
         DENIED_BY_USER = 'DENIED_BY_USER'
+        FAILED_DURING_SCENARIO = 'FAILED_DURING_SCENARIO'
 
     form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name='call_set')
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='call_set')
 
-    state = models.CharField(max_length=20, choices=State.choices)
+    state = models.CharField(max_length=22, choices=State.choices)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ('-updated_at',)
 
     def __str__(self):
         return (f"Call(id={self.id}, form={self.form.scenario_id}, "

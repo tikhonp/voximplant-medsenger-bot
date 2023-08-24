@@ -15,5 +15,6 @@ urlpatterns = [
     path('settings/contract/time_slots/<int:pk>/', views.ContractTimeSlotDetailView.as_view()),
     path('settings/contract/forms/', views.ContractFormsView.as_view()),
     path('settings/contract/forms/<int:pk>/', views.ContractFormDetailView.as_view()),
+    path('settings/contract/calls/', views.ContractCallsView.as_view()),
 
 ]

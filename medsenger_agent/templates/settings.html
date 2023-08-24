@@ -43,6 +43,7 @@
                 connectedForms: [],
                 timeSlots: [],
                 forms: [],
+                calls: [],
 
                 timeHourSelected: -1,
                 timeMinuteSelected: -1,
@@ -66,6 +67,16 @@
                 axios.get(url_time_slots, { params: { agent_token: agentToken } })
                     .then((response) => {
                         this.timeSlots = response.data
+                        this.contractDataLoading = false
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
+
+                let url_calls = `${baseUrl}/medsenger/settings/contract/calls/`
+                axios.get(url_calls, { params: { agent_token: agentToken } })
+                    .then((response) => {
+                        this.calls = response.data
                         this.contractDataLoading = false
                     })
                     .catch((error) => {
@@ -130,6 +141,10 @@
             formatTimeSlotTime(time) {
                 let [hour, minute, _] = time.split(':')
                 return `${hour}:${minute}`
+            },
+            parseDateTime(dateTimeString) {
+                let date = new Date(dateTimeString)
+                return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
             }
         },
         mounted() {
@@ -167,6 +182,13 @@
                             aria-current="true" data-bs-toggle="modal" data-bs-target="#AddTimeSlot">
                         Добавить
                     </button>
+                </div>
+
+                <h5 class="mt-5" v-if="calls.length">Звонки</h5>
+                <div class="list-group">
+                    <div v-for="call in calls" class="list-group-item d-flex justify-content-between align-items-center">
+                        [[ parseDateTime(call.updated_at) ]]; СТАТУС: [[ call.state ]]; ОПРОСНИК: [[ call.form.name ]]
+                    </div>
                 </div>
             </div>
 

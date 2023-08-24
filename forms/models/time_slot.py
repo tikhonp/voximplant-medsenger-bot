@@ -9,12 +9,14 @@ from medsenger_agent.models import Contract
 
 
 class TimeSlot(models.Model):
+    """Available time slot that patient accepts for call."""
+
     time = models.TimeField()
 
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='time_slot_set')
 
     class Meta:
-        ordering = ['time']
+        ordering = ('time',)
 
     @staticmethod
     def get_next_timeslot(from_date: datetime, contract: Contract) -> ((python_time | None), bool):

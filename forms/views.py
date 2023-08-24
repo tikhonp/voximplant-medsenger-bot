@@ -1,14 +1,13 @@
 from datetime import datetime
 
-from django.shortcuts import get_object_or_404
-from rest_framework.generics import ListAPIView, UpdateAPIView, RetrieveUpdateAPIView
+from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from forms.models import Form, Call, TimeSlot
-from forms.serializers import FormSerializer, UpdateCallSerializer
-from medsenger_agent.models import Contract
-from utils.agent_token_permission import AgentTokenPermission
+from forms.serializers import FormSerializer, CallSerializer
+from utils.contract_by_agent_token_mixin import ContractByAgentTokenMixin
+from utils.drf_permissions.agent_token_permission import AgentTokenPermission
 
 
 class FormList(ListAPIView):
@@ -32,12 +31,12 @@ class RetrieveUpdateCall(RetrieveUpdateAPIView):
     """
 
     queryset = Call.objects.all()
-    serializer_class = UpdateCallSerializer
+    serializer_class = CallSerializer
     permission_classes = [AgentTokenPermission]
     authentication_classes = []
 
 
-class GetNextTimeSlot(APIView):
+class GetNextTimeSlot(APIView, ContractByAgentTokenMixin):
     """
     Get next available time slot for contract and get time (`HH:MM:SS`) and `is_tomorrow` flag.
 
@@ -45,6 +44,5 @@ class GetNextTimeSlot(APIView):
     """
 
     def get(self, request):
-        contract = get_object_or_404(Contract.objects.all(), agent_token=request.query_params.get('agent_token'))
-        time, is_tomorrow = TimeSlot.get_next_timeslot(datetime.now(), contract=contract)
+        time, is_tomorrow = TimeSlot.get_next_timeslot(datetime.now(), contract=self.get_contract())
         return Response({'time': time, 'is_tomorrow': is_tomorrow})
