@@ -88,9 +88,11 @@ USE_I18N = False
 USE_TZ = False
 
 STATIC_URL = '/static/'
+# noinspection PyUnresolvedReferences
 STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
 MEDIA_URL = '/media/'
+# noinspection PyUnresolvedReferences
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 # Default primary key field type

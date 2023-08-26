@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db import models
 
 from medsenger_agent.models import Contract
@@ -15,3 +16,7 @@ class Form(models.Model):
 
     class Meta:
         ordering = ('name',)
+
+    @staticmethod
+    def commit_on_finish(contract: Contract, form_params):
+        settings.MEDSENGER_API_CLIENT.add_records(contract.contract_id, form_params)

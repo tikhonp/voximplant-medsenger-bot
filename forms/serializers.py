@@ -9,10 +9,7 @@ class FormSerializer(serializers.ModelSerializer):
     class Meta:
         model = Form
         fields = ('scenario_id', 'name')
-        extra_kwargs = {
-            'scenario_id': {'required': True},
-            'name': {'required': False, 'allow_blank': True}
-        }
+        extra_kwargs = {'scenario_id': {'required': True}, 'name': {'required': False, 'allow_blank': True}}
 
 
 class TimeSlotSerializer(serializers.ModelSerializer):
@@ -22,9 +19,13 @@ class TimeSlotSerializer(serializers.ModelSerializer):
 
 
 class CallSerializer(serializers.ModelSerializer):
-    form = FormSerializer()
+    form = FormSerializer(read_only=True)
 
     class Meta:
         model = Call
         fields = ('id', 'state', 'created_at', 'updated_at', 'form')
-        read_only_fields = ('created_at', 'updated_at', 'form')
+
+
+class FormValueSerializer(serializers.Serializer):
+    category_name = serializers.CharField()
+    value = serializers.CharField()

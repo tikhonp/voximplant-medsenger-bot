@@ -20,6 +20,10 @@ class Call(models.Model):
         DENIED_BY_USER = 'DENIED_BY_USER'
         FAILED_DURING_SCENARIO = 'FAILED_DURING_SCENARIO'
 
+        @staticmethod
+        def get_failure_states() -> [Call.State]:
+            return [Call.State.FAILED_OUTBOUND_CALL, Call.State.VOICEMAIL_DETECTED]
+
     form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name='call_set')
     contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='call_set')
 
@@ -35,10 +39,23 @@ class Call(models.Model):
         return (f"Call(id={self.id}, form={self.form.scenario_id}, "
                 f"contract={self.contract.contract_id}, state={self.state})")
 
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        if self.state in Call.State.get_failure_states():
+            self.on_call_fail()
+
+    def on_call_fail(self):
+        pass  # TODO: All staff
+
     def run_scenario(self):
         if not run_scenario(self.form.scenario_id, self.contract.patient_phone, self.id, self.contract.agent_token):
             self.state = Call.State.RUN_SCENARIO_FAILED
             self.save()
+
+    def finish_form(self, form_params):
+        self.state = Call.State.SUCCESS
+        Form.commit_on_finish(self.contract, form_params)
+        self.save()
 
     @staticmethod
     def start(contract: Contract, form: Form) -> Call:

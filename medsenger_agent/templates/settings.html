@@ -185,7 +185,7 @@
                 </div>
 
                 <h5 class="mt-5" v-if="calls.length">Звонки</h5>
-                <div class="list-group">
+                <div class="list-group mb-5">
                     <div v-for="call in calls" class="list-group-item d-flex justify-content-between align-items-center">
                         [[ parseDateTime(call.updated_at) ]]; СТАТУС: [[ call.state ]]; ОПРОСНИК: [[ call.form.name ]]
                     </div>

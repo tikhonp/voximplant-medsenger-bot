@@ -53,6 +53,7 @@ class MedsengerAgentStatusView(GenericAPIView):
         return Response(data)
 
 
+# noinspection PyMethodMayBeStatic
 class MedsengerAgentSettingsView(APIView):
     """
     Medsenger agent /settings page.
