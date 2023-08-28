@@ -16,10 +16,6 @@ def get_contracts_with_active_form(time_from: time, time_to: time, date_from: da
         .prefetch_related('forms__call_set')
         .exclude(forms__isnull=True)
         .filter(time_slot_set__time__range=(time_from, time_to))
-        .exclude(
-            Q(call_set__updated_at__gte=date_from) &
-            Q(call_set__state=Call.State.SUCCESS)
-        )
     )
 
 
@@ -38,9 +34,11 @@ def check_current_calls():
     for contract in contracts_with_active_forms:
         print("CONTRACT: ", contract)
         form = contract.forms.exclude(
-            Q(call_set__updated_at__gte=from_date) &
-            Q(call_set__state=Call.State.SUCCESS) &
-            Q(call_set__contract=contract)
+            scenario_id__in=Call.objects.filter(
+                updated_at__gte=from_date,
+                state=Call.State.SUCCESS,
+                contract=contract
+            ).values('form')
         ).first()
         print("form: ", form)
         if form is not None:
