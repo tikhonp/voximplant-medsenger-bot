@@ -7,7 +7,7 @@ from forms.models import Call, Form
 from medsenger_agent.models import Contract
 
 
-def get_contracts_with_active_form(time_from: time, time_to: time, date_from: datetime) -> QuerySet:
+def get_contracts_with_active_form(time_from: time, time_to: time) -> QuerySet:
     return (
         Contract
         .objects
@@ -28,7 +28,7 @@ def check_current_calls():
     from_date = now - timedelta(days=1)
     print(f"now: {now}\nto_time: {to_time}\nfrom_date: {from_date}")
 
-    contracts_with_active_forms = get_contracts_with_active_form(from_time, to_time, from_date)
+    contracts_with_active_forms = get_contracts_with_active_form(from_time, to_time)
     print("contracts_with_active_forms: ", contracts_with_active_forms)
 
     for contract in contracts_with_active_forms:
