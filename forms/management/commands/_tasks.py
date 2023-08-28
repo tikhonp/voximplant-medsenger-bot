@@ -22,22 +22,27 @@ def get_contracts_with_active_form(time_from: time, time_to: time, date_from: da
 
 
 def check_current_calls():
+    print("CALLED: check_current_calls")
     now = datetime.now()
     to_time = (now + timedelta(minutes=1)).time()
     from_date = now - timedelta(days=1)
 
+    print(f"now: {now}\nto_time: {to_time}\nfrom_date: {from_date}")
+
     contracts_with_active_forms = get_contracts_with_active_form(now.time(), to_time, from_date)
+    print("contracts_with_active_forms: ", contracts_with_active_forms)
 
     for contract in contracts_with_active_forms:
+        print("CONTRACT: ", contract)
         forms = contract.forms.exclude(
             Q(forms__call_set__updated_at__gte=from_date) &
             Q(forms__call_set__state=Call.State.SUCCESS)
         )
-
+        print("FORMS: ", forms)
         for form in forms:
             Call.start(contract, form)
 
-    print("kek")
+    print("FINISHED")
 
 
 def start_call(contract_id: int, form_id: int):
