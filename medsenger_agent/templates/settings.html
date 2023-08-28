@@ -106,8 +106,9 @@
                     })
             },
             addTimeSlot() {
+                let datetime = new Date(1970, 1, 1, this.timeHourSelected, this.timeMinuteSelected)
                 let url = `${baseUrl}/medsenger/settings/contract/time_slots/`
-                let data = { time: `${this.timeHourSelected}:${this.timeMinuteSelected}` }
+                let data = { time: `${datetime.getUTCHours()}:${datetime.getUTCMinutes()}` }
                 axios.post(url, data, { params: { agent_token: agentToken } })
                     .then((response) => {
                         this.fetchContract()
@@ -138,9 +139,11 @@
                     console.log(error)
                 })
             },
-            formatTimeSlotTime(time) {
-                let [hour, minute, _] = time.split(':')
-                return `${hour}:${minute}`
+            formatTimeSlotTime(timeString) {
+                let datetime = new Date('1970-01-01T' + timeString + 'Z')
+                let currentHours = ("0" + datetime.getHours()).slice(-2)
+                let currentMinutes = ("0" + datetime.getMinutes()).slice(-2)
+                return `${currentHours}:${currentMinutes}`
             },
             parseDateTime(dateTimeString) {
                 let date = new Date(dateTimeString)
