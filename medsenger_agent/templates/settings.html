@@ -152,6 +152,10 @@
         },
         mounted() {
             this.fetchContract()
+
+            let now = new Date()
+            this.timeHourSelected = now.getHours()
+            this.timeMinuteSelected = now.getMinutes()
         },
         template: `
             <div v-if="contractDataLoading" class="d-flex justify-content-center">
