@@ -23,7 +23,7 @@ class Contract(models.Model):
         self.patient_name = metadata.get('name', '')
         self.patient_email = metadata.get('email')
         self.patient_sex = metadata.get('sex')
-        self.phone = metadata.get('phone')
+        self.patient_phone = metadata.get('phone')
         agent_token = settings.MEDSENGER_API_CLIENT.get_agent_token(self.contract_id)
         self.agent_token = agent_token.get('agent_token', '') if agent_token is not None else ''
         super().save(*args, **kwargs)
