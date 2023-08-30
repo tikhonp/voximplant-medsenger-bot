@@ -11,6 +11,7 @@ def get_contracts_with_active_form(time_from: time, time_to: time) -> QuerySet:
     return (
         Contract
         .objects
+        .filter(is_active=True)
         .prefetch_related('forms')
         .prefetch_related('time_slot_set')
         .prefetch_related('forms__call_set')
