@@ -26,12 +26,14 @@ class TimeSlot(models.Model):
 
         for time_slot in time_slots:
             if time_slot.time > from_date.time():
-                return time_slot.time, False
+                localized_date = (datetime.combine(datetime.now().date(), time_slot.time) +
+                                  timedelta(minutes=contract.timezone_offset))
+                return localized_date.time, False
 
-        time = time_slots.first().time
-        if time is not None:
-            localized_date = (datetime.combine(datetime.now().date(), time) +
+        time_slot = time_slots.first()
+        if time_slot is not None:
+            localized_date = (datetime.combine(datetime.now().date(), time_slot.time) +
                               timedelta(minutes=contract.timezone_offset))
-            return localized_date.time
+            return localized_date.time, True
 
-        return None
+        return None, False
