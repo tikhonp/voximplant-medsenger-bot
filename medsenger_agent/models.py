@@ -15,6 +15,8 @@ class Contract(models.Model):
     patient_sex = models.CharField(max_length=20)
     patient_phone = models.CharField(max_length=12, null=True, default=None)
 
+    timezone_offset = models.IntegerField(null=True, default=None)
+
     def __str__(self):
         return "Contract ({})".format(self.contract_id)
 
@@ -26,6 +28,8 @@ class Contract(models.Model):
         self.patient_sex = metadata.get('sex')
         if self.patient_phone is None:
             self.patient_phone = metadata.get('phone')
+        if self.timezone_offset is None:
+            self.timezone_offset = metadata.get('timezone_offset')
         agent_token = settings.MEDSENGER_API_CLIENT.get_agent_token(self.contract_id)
         self.agent_token = agent_token.get('agent_token', '') if agent_token is not None else ''
         super().save(*args, **kwargs)

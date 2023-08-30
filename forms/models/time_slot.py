@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timedelta
 from datetime import time as python_time
 
 from django.db import models
@@ -28,4 +28,10 @@ class TimeSlot(models.Model):
             if time_slot.time > from_date.time():
                 return time_slot.time, False
 
-        return (time_slots.first().time, True) if time_slots.first() is not None else None
+        time = time_slots.first().time
+        if time is not None:
+            localized_date = (datetime.combine(datetime.now().date(), time) +
+                              timedelta(minutes=contract.timezone_offset))
+            return localized_date.time
+
+        return None
