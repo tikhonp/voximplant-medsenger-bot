@@ -1,3 +1,4 @@
+from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
 from medsenger_agent.models import Contract
@@ -10,6 +11,8 @@ class ApiKeyBodySerializer(serializers.Serializer):
 
 class ContractSerializer(ApiKeyBodySerializer):
     contract_id = serializers.IntegerField()
+    patient_phone = PhoneNumberField(region='RU', read_only=True)
+    patient_name = serializers.CharField(read_only=True)
 
     def create(self, validated_data):
         instance, created = Contract.objects.get_or_create(contract_id=validated_data.get('contract_id'))

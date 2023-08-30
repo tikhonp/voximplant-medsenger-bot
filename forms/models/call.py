@@ -113,7 +113,8 @@ class Call(models.Model):
                                                        only_doctor=True, is_urgent=True)
 
     def run_scenario(self):
-        if not run_scenario(self.form.scenario_id, self.contract.patient_phone, self.id, self.contract.agent_token):
+        if not run_scenario(self.form.scenario_id, self.contract.patient_phone.as_e164,
+                            self.id, self.contract.agent_token):
             self.state = Call.State.RUN_SCENARIO_FAILED
             self.save()
 

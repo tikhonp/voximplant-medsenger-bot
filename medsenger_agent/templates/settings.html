@@ -47,11 +47,22 @@
 
                 timeHourSelected: -1,
                 timeMinuteSelected: -1,
+
+                patient_phone: "",
             }
         },
         methods: {
             fetchContract() {
                 this.contractDataLoading = true
+
+                let url_contract = `${baseUrl}/medsenger/settings/contract/`
+                axios.get(url_contract, { params: { agent_token: agentToken } })
+                    .then((response) => {
+                        this.patient_phone = response.data.patient_phone
+                    })
+                    .catch((error) => {
+                        console.log(error)
+                    })
 
                 let url_forms = `${baseUrl}/medsenger/settings/contract/forms/`
                 axios.get(url_forms, { params: { agent_token: agentToken } })
@@ -165,6 +176,10 @@
             </div>
             <div v-else>
                 <h1>Настройки агента звонков</h1>
+
+                <div v-if="patient_phone == null" class="alert alert-danger mt-5" role="alert">
+                    Номер телефона пациента не найден! Пожалуйста, проверьте, чтобы пациент заполнил номер телефона в настройках профиля.
+                </div>
 
                 <h5 class="mt-5">Подключенные опросники</h5>
                 <div class="list-group">

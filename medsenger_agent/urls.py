@@ -11,6 +11,7 @@ urlpatterns = [
     path('settings', views.MedsengerAgentSettingsView.as_view()),
 
     # Settings page urls
+    path('settings/contract/', views.ContractView.as_view()),
     path('settings/contract/time_slots/', views.ContractTimeSlotsView.as_view()),
     path('settings/contract/time_slots/<int:pk>/', views.ContractTimeSlotDetailView.as_view()),
     path('settings/contract/forms/', views.ContractFormsView.as_view()),

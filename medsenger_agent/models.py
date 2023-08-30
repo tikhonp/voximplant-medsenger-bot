@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.db import models
+from phonenumber_field.modelfields import PhoneNumberField
 
 
 class Contract(models.Model):
@@ -13,7 +14,7 @@ class Contract(models.Model):
     patient_name = models.CharField(max_length=255)
     patient_email = models.EmailField(null=True, default=None)
     patient_sex = models.CharField(max_length=20)
-    patient_phone = models.CharField(max_length=12, null=True, default=None)
+    patient_phone = PhoneNumberField(region='RU', null=True, default=None)
 
     timezone_offset = models.IntegerField(null=True, default=None)
 

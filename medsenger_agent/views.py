@@ -1,8 +1,8 @@
 from django.conf import settings
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
-from rest_framework.generics import CreateAPIView, GenericAPIView, ListCreateAPIView, \
-    RetrieveDestroyAPIView, ListAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, ListCreateAPIView, RetrieveDestroyAPIView, \
+    RetrieveAPIView
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -45,11 +45,8 @@ class MedsengerAgentStatusView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        data = {
-            'is_tracking_data': True,
-            'supported_scenarios': [],
-            'tracked_contracts': [i.contract_id for i in self.get_queryset().filter(is_active=True)]
-        }
+        data = {'is_tracking_data': True, 'supported_scenarios': [],
+                'tracked_contracts': [i.contract_id for i in self.get_queryset().filter(is_active=True)]}
         return Response(data)
 
 
@@ -69,11 +66,7 @@ class MedsengerAgentSettingsView(APIView):
     def get(self, request):
         contract_id = request.GET.get('contract_id')
         contract = get_object_or_404(Contract.objects.all(), contract_id=contract_id)
-        return Response({
-            'contract_id': contract_id,
-            'base_url': settings.HOST,
-            'agent_token': contract.agent_token,
-        })
+        return Response({'contract_id': contract_id, 'base_url': settings.HOST, 'agent_token': contract.agent_token, })
 
 
 class ContractFormsView(ListCreateAPIView, ContractByAgentTokenMixin):
@@ -90,8 +83,7 @@ class ContractFormsView(ListCreateAPIView, ContractByAgentTokenMixin):
 
     def perform_create(self, serializer):
         self.get_contract().forms.add(
-            get_object_or_404(Form.objects.all(), scenario_id=serializer.data.get('scenario_id'))
-        )
+            get_object_or_404(Form.objects.all(), scenario_id=serializer.data.get('scenario_id')))
 
 
 class ContractFormDetailView(RetrieveDestroyAPIView, ContractByAgentTokenMixin):
@@ -153,3 +145,16 @@ class ContractCallsView(ListCreateAPIView, ContractByAgentTokenMixin):
 
     def perform_create(self, serializer):
         serializer.save(contract=self.get_contract())
+
+
+class ContractView(RetrieveAPIView, ContractByAgentTokenMixin):
+    """
+    Get contract data by agent token
+
+    Note: that `agent_token` must be provided
+    """
+
+    serializer_class = ContractSerializer
+
+    def get_object(self):
+        return self.get_contract()

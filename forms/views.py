@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
+from phonenumber_field.phonenumber import PhoneNumber
 from rest_framework.exceptions import ParseError, PermissionDenied
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
@@ -95,6 +96,6 @@ class GetAgentToken(APIView):
         if settings.VOXIMPLANT_INBOUND_CALLS_SECRET_KEY != voximplant_key:
             raise PermissionDenied("`voximplant_key` is invalid.")
 
-        contract = get_object_or_404(Contract.objects.all(), patient_phone=phone)
+        contract = get_object_or_404(Contract.objects.all(), patient_phone=PhoneNumber.from_string(phone, region='RU'))
 
         return Response({'agent_token': contract.agent_token})

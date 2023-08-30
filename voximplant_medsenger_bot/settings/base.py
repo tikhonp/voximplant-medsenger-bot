@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'corsheaders',
     'rest_framework',
+    'phonenumber_field',
     'medsenger_agent',
     'forms',
 ]

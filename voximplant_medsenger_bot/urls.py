@@ -8,7 +8,7 @@ admin.site.site_header = 'Voximplant-Medsenger'
 admin.site.site_title = 'Voximplant-Medsenger integration'
 
 urlpatterns = [
-    path('', lambda _: HttpResponse("Купил мужик шляпу, а она ему как раз!")),
+    path('', lambda _: HttpResponse("Купил мужик шляпу, а она ему как раз! <a href=\"admin/\">🐔</a>")),
     path('admin/', admin.site.urls),
     path('medsenger/', include('medsenger_agent.urls')),
     path('forms/', include('forms.urls'))
