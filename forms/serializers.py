@@ -19,11 +19,14 @@ class TimeSlotSerializer(serializers.ModelSerializer):
 
 
 class CallSerializer(serializers.ModelSerializer):
-    form = FormSerializer(read_only=True)
-
     class Meta:
         model = Call
-        fields = ('id', 'state', 'created_at', 'updated_at', 'form')
+        fields = ('id', 'state', 'created_at', 'updated_at', 'form', 'is_incoming')
+
+    def to_representation(self, instance):
+        representation = super(CallSerializer, self).to_representation(instance)
+        representation['form'] = FormSerializer(instance.form).data
+        return representation
 
 
 class FormValueSerializer(serializers.Serializer):

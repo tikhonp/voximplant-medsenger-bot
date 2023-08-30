@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from django.conf import settings
 from django.db import models
+from django.db.models import Sum, Case, When
 
 from forms.models.form import Form
 from medsenger_agent.models import Contract
@@ -32,6 +34,8 @@ class Call(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    is_incoming = models.BooleanField(default=False)
+
     class Meta:
         ordering = ('-updated_at',)
 
@@ -44,8 +48,18 @@ class Call(models.Model):
         if self.state in Call.State.get_failure_states():
             self.on_call_fail()
 
-    def on_call_fail(self):
-        pass  # TODO: All staff
+    def on_call_fail(self, n_max_failed_call: int = 3):
+        """Check if n_max_failed_call of last calls to this contract failed. And send message to doctor about it."""
+
+        calls = Call.objects.filter(contract=self.contract)
+
+        last_success_calls_number = (calls[:n_max_failed_call].aggregate(
+            success_calls=Sum(Case(When(state=Call.State.SUCCESS, then=1)), output_field=models.IntegerField())))
+
+        if calls.count() >= n_max_failed_call and last_success_calls_number.get('success_calls') == 0:
+            settings.MEDSENGER_API_CLIENT.send_message(self.contract.contract_id,
+                                                       "Нам не удается дозвониться до пациента, пожалуйста, проверьте!",
+                                                       only_doctor=True, is_urgent=True)
 
     def run_scenario(self):
         if not run_scenario(self.form.scenario_id, self.contract.patient_phone, self.id, self.contract.agent_token):

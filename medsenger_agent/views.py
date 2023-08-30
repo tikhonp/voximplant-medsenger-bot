@@ -139,7 +139,7 @@ class ContractTimeSlotDetailView(RetrieveDestroyAPIView, ContractByAgentTokenMix
         return TimeSlot.objects.filter(contract=self.get_contract())
 
 
-class ContractCallsView(ListAPIView, ContractByAgentTokenMixin):
+class ContractCallsView(ListCreateAPIView, ContractByAgentTokenMixin):
     """
     Get list of call related to contract
 
@@ -150,3 +150,6 @@ class ContractCallsView(ListAPIView, ContractByAgentTokenMixin):
 
     def get_queryset(self):
         return Call.objects.filter(contract=self.get_contract()).select_related('form')
+
+    def perform_create(self, serializer):
+        serializer.save(contract=self.get_contract())
