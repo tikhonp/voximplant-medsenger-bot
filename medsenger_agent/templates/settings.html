@@ -147,7 +147,7 @@
             },
             parseDateTime(dateTimeString) {
                 let date = new Date(dateTimeString)
-                return `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+                return date.toLocaleString()
             }
         },
         mounted() {
@@ -193,8 +193,18 @@
 
                 <h5 class="mt-5" v-if="calls.length">Звонки</h5>
                 <div class="list-group mb-5">
-                    <div v-for="call in calls" class="list-group-item d-flex justify-content-between align-items-center">
-                        [[ parseDateTime(call.updated_at) ]]; СТАТУС: [[ call.state ]]; ОПРОСНИК: [[ call.form.name ]]
+                    <div  v-for="call in calls" class="container list-group-item">
+                        <div class="row">
+                            <div class="col text-left">
+                              [[ parseDateTime(call.updated_at) ]]
+                            </div>
+                            <div class="col text-left">
+                              СТАТУС: [[ call.state ]]
+                            </div>
+                            <div class="col text-right">
+                              ОПРОСНИК: [[ call.form.name ]]
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
