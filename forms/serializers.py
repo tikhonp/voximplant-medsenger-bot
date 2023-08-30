@@ -29,6 +29,11 @@ class CallSerializer(serializers.ModelSerializer):
         return representation
 
 
+class UpdateCallSerializer(serializers.Serializer):
+    voximplant_state = serializers.ChoiceField(choices=Call.VoximplantState.choices)
+    scenario_state = serializers.ChoiceField(choices=Call.State.choices)
+
+
 class FormValueSerializer(serializers.Serializer):
     category_name = serializers.CharField()
     value = serializers.CharField()

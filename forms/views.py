@@ -1,11 +1,11 @@
 from datetime import datetime
 
-from rest_framework.generics import ListAPIView, RetrieveUpdateAPIView, GenericAPIView
+from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from forms.models import Form, Call, TimeSlot
-from forms.serializers import FormSerializer, CallSerializer, FormValueSerializer
+from forms.serializers import FormSerializer, FormValueSerializer, UpdateCallSerializer
 from utils.contract_by_agent_token_mixin import ContractByAgentTokenMixin
 from utils.drf_permissions.agent_token_permission import AgentTokenPermission
 
@@ -23,7 +23,7 @@ class FormList(ListAPIView):
     authentication_classes = []
 
 
-class RetrieveUpdateCall(RetrieveUpdateAPIView):
+class RetrieveUpdateCall(GenericAPIView):
     """
     Update call from voximplant scenario.
 
@@ -31,9 +31,16 @@ class RetrieveUpdateCall(RetrieveUpdateAPIView):
     """
 
     queryset = Call.objects.all()
-    serializer_class = CallSerializer
+    serializer_class = UpdateCallSerializer
     permission_classes = [AgentTokenPermission]
     authentication_classes = []
+
+    def post(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        instance.update_state_from_scenario(**serializer.data)
+        return Response(serializer.data)
 
 
 class FinishScenario(GenericAPIView):
