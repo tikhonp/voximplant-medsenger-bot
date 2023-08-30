@@ -31,7 +31,7 @@ class TimeSlot(models.Model):
                                       timedelta(minutes=contract.timezone_offset))
                     return localized_date.time(), False
                 else:
-                    return time_slot.time(), True
+                    return time_slot.time, False
 
         time_slot = time_slots.first()
         if time_slot is not None:
@@ -40,6 +40,6 @@ class TimeSlot(models.Model):
                                   timedelta(minutes=contract.timezone_offset))
                 return localized_date.time(), True
             else:
-                return time_slot.time(), True
+                return time_slot.time, True
 
         return None, False
