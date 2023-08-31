@@ -77,30 +77,29 @@ class Call(models.Model):
             self.on_call_fail()
 
     def update_state_from_scenario(self, scenario_state: Call.State, voximplant_state: Call.VoximplantState):
-        if voximplant_state == Call.VoximplantState.VOICEMAIL_DETECTOR:
-            self.state = Call.State.VOICEMAIL_DETECTED
-        elif voximplant_state == Call.VoximplantState.INITIATED_BY_THE_CALLEE:
-            self.state = Call.State.THE_CALLEE_STOPPED_CALL
-        elif voximplant_state == Call.VoximplantState.THE_NUMBER_IS_BUSY:
-            self.state = Call.State.THE_NUMBER_IS_BUSY
-        elif voximplant_state in (Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_487,
-                                  Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_408,
-                                  Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_500):
-            self.state = Call.State.THE_CALLEE_HAS_NOT_ANSWERED
-        elif voximplant_state == Call.VoximplantState.THE_CALL_HAS_BEEN_DECLINED:
-            self.state = Call.State.THE_CALLEE_HAS_BEEN_DECLINED
-        elif voximplant_state == Call.VoximplantState.INVALID_NUMBER:
-            self.state = Call.State.INVALID_NUMBER
-        elif voximplant_state == Call.VoximplantState.THE_CALLEE_IS_UNAVAILABLE:
-            self.state = Call.State.THE_CALLEE_IS_UNAVAILABLE
-        elif voximplant_state == Call.VoximplantState.CALL_IS_FORBIDDEN:
-            self.state = Call.State.CALL_IS_FORBIDDEN
-        else:
-            self.state = scenario_state
+        """
+        Compile two statuses from voximplant and call into single db status.
+        """
+
+        states_dict = {
+            Call.VoximplantState.VOICEMAIL_DETECTOR: Call.State.VOICEMAIL_DETECTED,
+            Call.VoximplantState.INITIATED_BY_THE_CALLEE: Call.State.THE_CALLEE_STOPPED_CALL,
+            Call.VoximplantState.THE_NUMBER_IS_BUSY: Call.State.THE_NUMBER_IS_BUSY,
+            Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_487: Call.State.THE_CALLEE_HAS_NOT_ANSWERED,
+            Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_408: Call.State.THE_CALLEE_HAS_NOT_ANSWERED,
+            Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_500: Call.State.THE_CALLEE_HAS_NOT_ANSWERED,
+            Call.VoximplantState.THE_CALL_HAS_BEEN_DECLINED: Call.State.THE_CALLEE_HAS_BEEN_DECLINED,
+            Call.VoximplantState.INVALID_NUMBER: Call.State.INVALID_NUMBER,
+            Call.VoximplantState.THE_CALLEE_IS_UNAVAILABLE: Call.State.THE_CALLEE_IS_UNAVAILABLE,
+            Call.VoximplantState.CALL_IS_FORBIDDEN: Call.State.CALL_IS_FORBIDDEN,
+        }
+        self.state = states_dict.get(voximplant_state, scenario_state)
         self.save()
 
     def on_call_fail(self, n_max_failed_call: int = 3):
-        """Check if n_max_failed_call of last calls to this contract failed. And send message to doctor about it."""
+        """
+        Check if n_max_failed_call of last calls to this contract failed. And send message to doctor about it.
+        """
 
         calls = Call.objects.filter(contract=self.contract)
 
@@ -113,18 +112,31 @@ class Call(models.Model):
                                                        only_doctor=True, is_urgent=True)
 
     def run_scenario(self):
+        """
+        Run a voximplant scenario (execute call).
+        """
+
         if not run_scenario(self.form.scenario_id, self.contract.patient_phone.as_e164,
                             self.id, self.contract.agent_token):
             self.state = Call.State.RUN_SCENARIO_FAILED
             self.save()
 
-    def finish_form(self, form_params):
+    def finish_call(self, form_params: dict[str, str]):
+        """
+        Commit records to form and finish call.
+        """
+
         self.state = Call.State.SUCCESS
         Form.commit_on_finish(self.contract, form_params)
         self.save()
 
     @staticmethod
     def start(contract: Contract, form: Form) -> Call:
+        """
+        Start call for specific contract and form.
+        Creates `Call` object checks contract for phone is not None and runs call.
+        """
+
         if contract.patient_phone is None:
             call = Call(form=form, contract=contract, state=Call.State.PHONE_IS_NONE)
             call.save()

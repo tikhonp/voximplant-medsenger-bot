@@ -1,0 +1,19 @@
+DJANGO_SECRET_KEY="generate some secret"
+
+DATABASE_NAME="voximplant-medsenger-bot"
+DATABASE_USER="user"
+DATABASE_PASSWORD="super secure"
+DATABASE_HOST="localhost"
+DATABASE_PORT="1111"
+
+MEDSENGER_APP_KEY="medsenger agent key"
+MEDSENGER_AGENT_ID="0"
+MEDSENGER_MAIN_HOST="https://medsenger.ru"
+
+VOXIMPLANT_ACCESS_TOKEN="voximplant token"
+VOXIMPLANT_ACCOUNT_NAME="lol"
+VOXIMPLANT_API_HOSTNAME="kitapi-ru.voximplant.com"
+VOXIMPLANT_CALLER_ID="1111"
+VOXIMPLANT_INBOUND_CALLS_SECRET_KEY="outbound calls secret"
+
+SENTRY_DSN="https://lalalalalal@o1075119.ingest.sentry.io/blablablabla"

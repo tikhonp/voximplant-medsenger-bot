@@ -9,7 +9,7 @@ REPEAT_DELAY_SECONDS = 60
 
 
 class Command(BaseCommand):
-    help = 'Start worker for executing calls at specific time'
+    help = 'Start worker for executing calls at specific time.'
 
     def _task(self, scheduler):
         scheduler.enter(REPEAT_DELAY_SECONDS, 1, self._task, (scheduler,))

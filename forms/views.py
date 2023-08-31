@@ -19,7 +19,7 @@ class FormList(ListAPIView):
     """
     List of all forms for settings page.
 
-    Note: that `agent_token` must be provided
+    Note: that `agent_token` must be provided.
     """
 
     queryset = Form.objects.filter(is_active=True)
@@ -32,7 +32,7 @@ class RetrieveUpdateCall(GenericAPIView):
     """
     Update call from voximplant scenario.
 
-    Note: that `agent_token` must be provided
+    Note: that `agent_token` must be provided.
     """
 
     queryset = Call.objects.all()
@@ -52,7 +52,7 @@ class FinishScenario(GenericAPIView):
     """
     Finish scenario and commit final form data.
 
-    Note: that `agent_token` must be provided
+    Note: that `agent_token` must be provided.
     """
 
     queryset = Call.objects.all()
@@ -72,7 +72,7 @@ class GetNextTimeSlot(APIView, ContractByAgentTokenMixin):
     """
     Get next available time slot for contract and get time (`HH:MM:SS`) and `is_tomorrow` flag.
 
-    Note: that `agent_token` must be provided
+    Note: that `agent_token` must be provided.
     """
 
     def get(self, request, *args, **kwargs):
@@ -80,10 +80,11 @@ class GetNextTimeSlot(APIView, ContractByAgentTokenMixin):
         return Response({'time': time, 'is_tomorrow': is_tomorrow})
 
 
+# noinspection PyMethodMayBeStatic
 class GetAgentToken(APIView):
     """
     Get agent token by phone number allow requests only from voximplant.
-    Accepts `phone` and `voximplant_key` query params
+    Accepts `phone` and `voximplant_key` query params.
     """
 
     def get(self, request, *args, **kwargs):

@@ -2,7 +2,7 @@ from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
 from medsenger_agent.models import Contract
-from utils.serializer_fields.api_key_field import ApiKeyField
+from utils.api_key_field import ApiKeyField
 
 
 class ApiKeyBodySerializer(serializers.Serializer):

@@ -20,7 +20,10 @@ class TimeSlot(models.Model):
 
     @staticmethod
     def get_next_timeslot(from_date: datetime, contract: Contract) -> ((python_time | None), bool):
-        """Get next available time slot, returns time and flag if that time is tomorrow, otherwise now"""
+        """
+        Get next available time slot, returns time and flag if that time is tomorrow, otherwise now.
+        If contract's timezone_offset is not None time will be localized.
+        """
 
         time_slots = TimeSlot.objects.filter(contract=contract)
 

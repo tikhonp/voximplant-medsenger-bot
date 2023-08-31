@@ -6,6 +6,10 @@ from medsenger_agent.models import Contract
 
 
 class AgentTokenPermission(BasePermission):
+    """
+    Checks for existence of Contract with agent_token from query params.
+    """
+
     message = "`agent_token` query param invalid or does not exists."
 
     def has_object_permission(self, request, view, obj):

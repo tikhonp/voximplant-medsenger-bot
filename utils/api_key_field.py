@@ -4,7 +4,7 @@ from rest_framework.exceptions import PermissionDenied
 
 
 class ApiKeyField(serializers.CharField):
-    """ApiKeyField for api key validation"""
+    """ApiKeyField for api key validation."""
 
     def to_internal_value(self, data):
         value = super().to_internal_value(data)

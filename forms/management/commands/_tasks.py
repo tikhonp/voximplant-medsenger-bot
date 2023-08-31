@@ -1,13 +1,17 @@
 from datetime import datetime, timedelta, time
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import Q, QuerySet
+from django.db.models import QuerySet
 
 from forms.models import Call, Form
 from medsenger_agent.models import Contract
 
 
 def get_contracts_with_active_form(time_from: time, time_to: time) -> QuerySet:
+    """
+    Check if there are any active contracts with forms and time slots in given time range.
+    """
+
     return (
         Contract
         .objects
@@ -21,13 +25,16 @@ def get_contracts_with_active_form(time_from: time, time_to: time) -> QuerySet:
 
 
 def check_current_calls():
-    print("CALLED: check_current_calls")
+    """
+    Check for available time_slots in current time and find contracts where call must execute and run calls.
+    Time interval is now plus one minute.
+    """
 
     now = datetime.now()
-    to_time = (now + timedelta(minutes=1)).time()
     from_time = now.time()
-    from_date = now - timedelta(days=1)
-    print(f"now: {now}\nto_time: {to_time}\nfrom_date: {from_date}")
+    to_time = (now + timedelta(minutes=1)).time()
+    day_ago_date = now - timedelta(days=1)
+    print(f"now: {now}\nto_time: {to_time}\nday_ago_date: {day_ago_date}")
 
     contracts_with_active_forms = get_contracts_with_active_form(from_time, to_time)
     print("contracts_with_active_forms: ", contracts_with_active_forms)
@@ -36,19 +43,21 @@ def check_current_calls():
         print("CONTRACT: ", contract)
         form = contract.forms.exclude(
             scenario_id__in=Call.objects.filter(
-                updated_at__gte=from_date,
+                updated_at__gte=day_ago_date,
                 state=Call.State.SUCCESS,
                 contract=contract
             ).values('form')
-        ).first()
+        ).first()  # execute only one form at time slot
         print("form: ", form)
         if form is not None:
             Call.start(contract, form)
 
-    print("FINISHED")
-
 
 def start_call(contract_id: int, form_id: int):
+    """
+    Manually start a call, with contract_id and form_id.
+    """
+
     try:
         contract = Contract.objects.get(contract_id=contract_id)
     except ObjectDoesNotExist:

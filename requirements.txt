@@ -13,4 +13,4 @@ medsenger-api==0.1.59
 
 # Production deploy
 psycopg2-binary==2.9.7
-sentry-sdk[django]
+sentry-sdk[django]==1.30.0

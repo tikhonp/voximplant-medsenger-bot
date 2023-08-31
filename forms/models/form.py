@@ -18,5 +18,9 @@ class Form(models.Model):
         ordering = ('name',)
 
     @staticmethod
-    def commit_on_finish(contract: Contract, form_params):
+    def commit_on_finish(contract: Contract, form_params: dict[str, str]):
+        """
+        Commit records (`form_params`) to Medsenger using add_records.
+        """
+
         settings.MEDSENGER_API_CLIENT.add_records(contract.contract_id, form_params)
