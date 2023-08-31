@@ -19,7 +19,7 @@ class Contract(models.Model):
     timezone_offset = models.IntegerField(null=True, default=None)
 
     def __str__(self):
-        return (f"Contract(id={self.contract_id}, patient_phone={self.patient_phone.as_e164}, "
+        return (f"Contract(id={self.contract_id}, patient_phone={self.patient_phone}, "
                 f"timezone_offset={self.timezone_offset})")
 
     def save(self, *args, **kwargs):

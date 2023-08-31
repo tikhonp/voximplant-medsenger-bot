@@ -33,17 +33,21 @@ def check_current_calls():
     now = datetime.now()
     from_time = now.time()
     to_time = (now + timedelta(minutes=1)).time()
-    day_ago_date = now - timedelta(days=1)
-    print(f"now: {now}\nto_time: {to_time}\nday_ago_date: {day_ago_date}")
+    print(f"now: {now}\nto_time: {to_time}\n")
 
     contracts_with_active_forms = get_contracts_with_active_form(from_time, to_time)
     print("contracts_with_active_forms: ", contracts_with_active_forms)
 
     for contract in contracts_with_active_forms:
         print("CONTRACT: ", contract)
+
+        current_day_start_date = datetime.combine(now.date(), time(0, 0, 0))
+        if contract.timezone_offset is not None:
+            current_day_start_date = current_day_start_date - timedelta(minutes=contract.timezone_offset)
+
         form = contract.forms.exclude(
             scenario_id__in=Call.objects.filter(
-                updated_at__gte=day_ago_date,
+                updated_at__gte=current_day_start_date,
                 state=Call.State.SUCCESS,
                 contract=contract
             ).values('form')

@@ -113,7 +113,7 @@ class Call(models.Model):
                                                        "Нам не удается дозвониться до пациента, пожалуйста, проверьте!",
                                                        only_doctor=True, is_urgent=True)
 
-    def run_scenario(self):
+    def __run_scenario(self):
         """
         Run a voximplant scenario (execute call).
         """
@@ -146,5 +146,5 @@ class Call(models.Model):
 
         call = Call(form=form, contract=contract, state=Call.State.CREATED)
         call.save()
-        call.run_scenario()
+        call.__run_scenario()
         return call
