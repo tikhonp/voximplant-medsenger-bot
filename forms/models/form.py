@@ -1,3 +1,5 @@
+from typing import Dict
+
 from django.conf import settings
 from django.db import models
 
@@ -18,7 +20,7 @@ class Form(models.Model):
         ordering = ('name',)
 
     @staticmethod
-    def commit_on_finish(contract: Contract, form_params: dict[str, str]):
+    def commit_on_finish(contract: Contract, form_params: Dict[str, str]):
         """
         Commit records (`form_params`) to Medsenger using add_records.
         """

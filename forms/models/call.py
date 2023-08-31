@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Dict
+
 from django.conf import settings
 from django.db import models
 from django.db.models import Sum, Case, When
@@ -121,7 +123,7 @@ class Call(models.Model):
             self.state = Call.State.RUN_SCENARIO_FAILED
             self.save()
 
-    def finish_call(self, form_params: dict[str, str]):
+    def finish_call(self, form_params: Dict[str, str]):
         """
         Commit records to form and finish call.
         """
