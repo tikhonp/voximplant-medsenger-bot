@@ -64,7 +64,7 @@ class FinishScenario(GenericAPIView):
         instance = self.get_object()
         serializer = self.get_serializer(data=request.data, many=True)
         serializer.is_valid(raise_exception=True)
-        instance.finish_form(serializer.data)
+        instance.finish_call(serializer.data)
         return Response(serializer.data)
 
 
