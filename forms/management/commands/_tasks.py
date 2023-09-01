@@ -33,7 +33,7 @@ def check_current_calls():
     now = datetime.now()
     from_time = now.time()
     to_time = (now + timedelta(minutes=1)).time()
-    print(f"now: {now}\nto_time: {to_time}\n")
+    print(f"\nnow: {now}\nto_time: {to_time}")
 
     contracts_with_active_forms = get_contracts_with_active_form(from_time, to_time)
     print("contracts_with_active_forms: ", contracts_with_active_forms)

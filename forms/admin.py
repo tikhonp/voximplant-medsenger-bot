@@ -18,5 +18,3 @@ class CallAdmin(admin.ModelAdmin):
     list_display = ('id', 'form', 'contract', 'state', 'created_at', )
     list_filter = ('state',)
     readonly_fields = ('created_at', 'updated_at')
-    search_fields = ('form__id', 'contract__id')
-    search_help_text = "Search by related 'form__id' or 'contract__id'."
