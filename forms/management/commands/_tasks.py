@@ -1,7 +1,7 @@
 from datetime import datetime, timedelta, time
 
 from django.core.exceptions import ObjectDoesNotExist
-from django.db.models import QuerySet
+from django.db.models import QuerySet, Q
 
 from forms.models import Call, Form
 from medsenger_agent.models import Contract
@@ -31,11 +31,12 @@ def check_current_calls():
     """
 
     now = datetime.now()
-    from_time = now.time()
-    to_time = (now + timedelta(minutes=1)).time()
-    print(f"\nnow: {now}\nto_time: {to_time}")
+    print(f"\nnow: {now}")
 
-    contracts_with_active_forms = get_contracts_with_active_form(from_time, to_time)
+    contracts_with_active_forms = get_contracts_with_active_form(
+        time_from=now.time(),
+        time_to=(now + timedelta(minutes=1)).time()
+    )
     print("contracts_with_active_forms: ", contracts_with_active_forms)
 
     for contract in contracts_with_active_forms:
@@ -47,9 +48,13 @@ def check_current_calls():
 
         form = contract.forms.exclude(
             scenario_id__in=Call.objects.filter(
-                updated_at__gte=current_day_start_date,
-                state=Call.State.SUCCESS,
-                contract=contract
+                Q(contract=contract),
+
+                # Exclude forms with success calls today
+                Q(updated_at__gte=current_day_start_date, state=Call.State.SUCCESS) |
+
+                # Exclude forms with recently started calls
+                Q(created_at__gte=(now - timedelta(minutes=5)), state=Call.State.CREATED)
             ).values('form')
         ).first()  # execute only one form at time slot
         print("form: ", form)
