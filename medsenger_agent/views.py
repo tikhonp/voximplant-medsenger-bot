@@ -69,6 +69,20 @@ class MedsengerAgentSettingsView(APIView):
         return Response({'contract_id': contract_id, 'base_url': settings.HOST, 'agent_token': contract.agent_token, })
 
 
+class MedsengerAgentOrderView(GenericAPIView):
+    """
+    Medsenger order
+    """
+
+    serializer_class = ApiKeyBodySerializer
+
+    def post(self, request):
+        print(request.data)
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return HttpResponse("ok")
+
+
 class ContractFormsView(ListCreateAPIView, ContractByAgentTokenMixin):
     """
     Get list of forms for contract or add new form to contract.
