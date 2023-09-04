@@ -81,7 +81,7 @@ class MedsengerAgentOrderView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         instance = get_object_or_404(self.get_queryset(), contract_id=serializer.data.get('contract_id'))
-        instance.save()
+        instance.update_user()
         return HttpResponse("ok")
 
 

@@ -23,15 +23,25 @@ class Contract(models.Model):
                 f"timezone_offset={self.timezone_offset})")
 
     def save(self, *args, **kwargs):
+        if None in (self.patient_name, self.patient_email, self.patient_sex, self.patient_phone, self.timezone_offset,
+                    self.agent_token):
+            metadata = settings.MEDSENGER_API_CLIENT.get_patient_info(self.contract_id)
+            self.patient_name = metadata.get('name', '')
+            if self.patient_email is None:
+                self.patient_email = metadata.get('email')
+            self.patient_sex = metadata.get('sex')
+            if self.patient_phone is None:
+                self.patient_phone = metadata.get('phone')
+            if self.timezone_offset is None:
+                self.timezone_offset = metadata.get('timezone_offset')
+            agent_token = settings.MEDSENGER_API_CLIENT.get_agent_token(self.contract_id)
+            self.agent_token = agent_token.get('agent_token', '') if agent_token is not None else ''
+        super().save(*args, **kwargs)
+
+    def update_user(self):
         metadata = settings.MEDSENGER_API_CLIENT.get_patient_info(self.contract_id)
         self.patient_name = metadata.get('name', '')
-        if self.patient_email is None:
-            self.patient_email = metadata.get('email')
-        self.patient_sex = metadata.get('sex')
-        if self.patient_phone is None:
-            self.patient_phone = metadata.get('phone')
-        if self.timezone_offset is None:
-            self.timezone_offset = metadata.get('timezone_offset')
-        agent_token = settings.MEDSENGER_API_CLIENT.get_agent_token(self.contract_id)
-        self.agent_token = agent_token.get('agent_token', '') if agent_token is not None else ''
-        super().save(*args, **kwargs)
+        self.patient_email = metadata.get('email')
+        self.patient_phone = metadata.get('phone')
+        self.timezone_offset = metadata.get('timezone_offset')
+        self.save()
