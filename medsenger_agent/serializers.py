@@ -1,3 +1,4 @@
+from django.db import models
 from phonenumber_field.serializerfields import PhoneNumberField
 from rest_framework import serializers
 
@@ -22,3 +23,12 @@ class ContractSerializer(ApiKeyBodySerializer):
             instance.save()
 
         return instance
+
+
+class OrderSerializer(ApiKeyBodySerializer):
+    class OrderChoices(models.TextChoices):
+        USER_UPDATED = 'user_updated'
+        NEW_TIMEZONE = 'new_timezone'
+
+    contract_id = serializers.IntegerField()
+    order = serializers.ChoiceField(choices=OrderChoices.choices)

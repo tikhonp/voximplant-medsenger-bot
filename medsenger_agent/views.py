@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from forms.models import Form, TimeSlot, Call
 from forms.serializers import TimeSlotSerializer, FormSerializer, CallSerializer
 from medsenger_agent.models import Contract
-from medsenger_agent.serializers import ContractSerializer, ApiKeyBodySerializer
+from medsenger_agent.serializers import ContractSerializer, ApiKeyBodySerializer, OrderSerializer
 from utils.contract_by_agent_token_mixin import ContractByAgentTokenMixin
 from utils.drf_permissions.api_key_permission import ApiKeyPermission
 
@@ -31,7 +31,7 @@ class MedsengerAgentRemoveContractView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        instance = get_object_or_404(self.get_queryset(), contract_id=serializer.data['contract_id'])
+        instance = get_object_or_404(self.get_queryset(), contract_id=serializer.data.get('contract_id'))
         instance.is_active = False
         instance.save()
 
@@ -74,12 +74,14 @@ class MedsengerAgentOrderView(GenericAPIView):
     Medsenger order
     """
 
-    serializer_class = ApiKeyBodySerializer
+    serializer_class = OrderSerializer
+    queryset = Contract.objects.all()
 
     def post(self, request):
-        print(request.data)
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+        instance = get_object_or_404(self.get_queryset(), contract_id=serializer.data.get('contract_id'))
+        instance.save()
         return HttpResponse("ok")
 
 
