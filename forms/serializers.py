@@ -19,14 +19,19 @@ class TimeSlotSerializer(serializers.ModelSerializer):
 
 
 class CallSerializer(serializers.ModelSerializer):
+    state_ru_localized = serializers.SerializerMethodField()
+
     class Meta:
         model = Call
-        fields = ('id', 'state', 'created_at', 'updated_at', 'form', 'is_incoming')
+        fields = ('id', 'state', 'created_at', 'updated_at', 'form', 'is_incoming', 'state_ru_localized')
 
     def to_representation(self, instance):
         representation = super(CallSerializer, self).to_representation(instance)
         representation['form'] = FormSerializer(instance.form).data
         return representation
+
+    def get_state_ru_localized(self, obj):
+        return Call.State(obj.state).ru_localized
 
 
 class UpdateCallSerializer(serializers.Serializer):

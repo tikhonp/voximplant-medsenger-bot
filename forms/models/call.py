@@ -48,6 +48,26 @@ class Call(models.Model):
         DENIED_BY_USER = 'DENIED_BY_USER'
         FAILED_DURING_SCENARIO = 'FAILED_DURING_SCENARIO'
 
+        @property
+        def ru_localized(self) -> str:
+            strings: Dict[Call.State, str] = {
+                Call.State.CREATED: "Звонок начался",
+                Call.State.SUCCESS: "Успешно завершён",
+                Call.State.VOICEMAIL_DETECTED: "Перенаправлен на автоответчик",
+                Call.State.THE_NUMBER_IS_BUSY: "Телефон пациента занят",
+                Call.State.THE_CALLEE_HAS_NOT_ANSWERED: "Пациент не ответил",
+                Call.State.THE_CALLEE_HAS_BEEN_DECLINED: "Пациент отклонил звонок",
+                Call.State.THE_CALLEE_STOPPED_CALL: "Пациент повесил трубку",
+                Call.State.INVALID_NUMBER: "Неверный номер телефона",
+                Call.State.THE_CALLEE_IS_UNAVAILABLE: "Телефон пациента недоступен",
+                Call.State.CALL_IS_FORBIDDEN: "Звонок запрещён",
+                Call.State.PHONE_IS_NONE: "Не удалось найти номер телефона",
+                Call.State.RUN_SCENARIO_FAILED: "Ошибка при запуске сценария",
+                Call.State.DENIED_BY_USER: "Пациенту неудобно принять звонок",
+                Call.State.FAILED_DURING_SCENARIO: "Ошибка во время сценария",
+            }
+            return strings[self]
+
         @staticmethod
         def get_failure_states() -> [Call.State]:
             return [Call.State.VOICEMAIL_DETECTED, Call.State.THE_NUMBER_IS_BUSY,
