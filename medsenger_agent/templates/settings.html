@@ -103,7 +103,7 @@
                 let url = `${baseUrl}/medsenger/settings/contract/forms/${scenario_id}/`
                 axios.delete(url, { params: { agent_token: agentToken } })
                     .then((response) => {
-                        this.fetchContract()
+                        this.fetchContractForms()
                     })
                     .catch((error) => {
                         console.log(error)
@@ -138,7 +138,7 @@
                 let url = `${baseUrl}/medsenger/settings/contract/time_slots/${id}/`
                 axios.delete(url, { params: { agent_token: agentToken } })
                     .then((response) => {
-                        this.fetchContractForms()
+                        this.fetchContractTimeSlots()
                         $('#AddTimeSlot').modal('hide')
                     })
                     .catch((error) => {
