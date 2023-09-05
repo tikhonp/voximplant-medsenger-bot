@@ -23,8 +23,9 @@ class Contract(models.Model):
                 f"timezone_offset={self.timezone_offset})")
 
     def save(self, *args, **kwargs):
-        if None in (self.patient_name, self.patient_email, self.patient_sex, self.patient_phone, self.timezone_offset,
-                    self.agent_token):
+        if self.is_active and None in (self.patient_name, self.patient_email,
+                                       self.patient_sex, self.patient_phone,
+                                       self.timezone_offset, self.agent_token):
             metadata = settings.MEDSENGER_API_CLIENT.get_patient_info(self.contract_id)
             self.patient_name = metadata.get('name', '')
             if self.patient_email is None:

@@ -38,7 +38,8 @@
         delimiters: ['[[',']]'],
         data() {
             return {
-                contractDataLoading: true,
+                contractFormsLoading: false,
+                contractTimeSlotsLoading: false,
 
                 connectedForms: [],
                 timeSlots: [],
@@ -53,8 +54,6 @@
         },
         methods: {
             fetchContract() {
-                this.contractDataLoading = true
-
                 let url_contract = `${baseUrl}/medsenger/settings/contract/`
                 axios.get(url_contract, { params: { agent_token: agentToken } })
                     .then((response) => {
@@ -63,32 +62,38 @@
                     .catch((error) => {
                         console.log(error)
                     })
-
+            },
+            fetchContractForms() {
+                this.contractFormsLoading = true
                 let url_forms = `${baseUrl}/medsenger/settings/contract/forms/`
                 axios.get(url_forms, { params: { agent_token: agentToken } })
                     .then((response) => {
                         this.connectedForms = response.data
-                        this.contractDataLoading = false
+                        this.contractFormsLoading = false
                     })
                     .catch((error) => {
                         console.log(error)
+                        this.contractFormsLoading = false
                     })
-
+            },
+            fetchContractTimeSlots() {
+                this.contractTimeSlotsLoading = true
                 let url_time_slots = `${baseUrl}/medsenger/settings/contract/time_slots/`
                 axios.get(url_time_slots, { params: { agent_token: agentToken } })
                     .then((response) => {
                         this.timeSlots = response.data
-                        this.contractDataLoading = false
+                        this.contractTimeSlotsLoading = false
                     })
                     .catch((error) => {
                         console.log(error)
+                        this.contractTimeSlotsLoading = false
                     })
-
+            },
+            fetchContractsCalls() {
                 let url_calls = `${baseUrl}/medsenger/settings/contract/calls/`
                 axios.get(url_calls, { params: { agent_token: agentToken } })
                     .then((response) => {
                         this.calls = response.data
-                        this.contractDataLoading = false
                     })
                     .catch((error) => {
                         console.log(error)
@@ -109,7 +114,7 @@
                 let data = { scenario_id: scenario_id }
                 axios.post(url_forms, data, { params: { agent_token: agentToken } })
                     .then((response) => {
-                        this.fetchContract()
+                        this.fetchContractForms()
                         $('#addContractModal').modal('hide')
                     })
                     .catch((error) => {
@@ -122,7 +127,7 @@
                 let data = { time: `${datetime.getUTCHours()}:${datetime.getUTCMinutes()}` }
                 axios.post(url, data, { params: { agent_token: agentToken } })
                     .then((response) => {
-                        this.fetchContract()
+                        this.fetchContractTimeSlots()
                         $('#AddTimeSlot').modal('hide')
                     })
                     .catch((error) => {
@@ -133,14 +138,14 @@
                 let url = `${baseUrl}/medsenger/settings/contract/time_slots/${id}/`
                 axios.delete(url, { params: { agent_token: agentToken } })
                     .then((response) => {
-                        this.fetchContract()
+                        this.fetchContractForms()
                         $('#AddTimeSlot').modal('hide')
                     })
                     .catch((error) => {
                         console.log(error)
                     })
             },
-            fetchForms() {
+            fetchAvailableForms() {
                 let url = `${baseUrl}/forms/`
                 axios.get(url, { params: { agent_token: agentToken } })
                 .then((response) => {
@@ -189,62 +194,68 @@
         },
         mounted() {
             this.fetchContract()
+            this.fetchContractForms()
+            this.fetchContractTimeSlots()
+            this.fetchContractsCalls()
 
             let now = new Date()
             this.timeHourSelected = now.getHours()
             this.timeMinuteSelected = now.getMinutes()
         },
         template: `
-            <div v-if="contractDataLoading" class="d-flex justify-content-center">
+            <h1>Настройки агента звонков</h1>
+
+            <div v-if="patient_phone == null" class="alert alert-danger mt-5" role="alert">
+                Номер телефона пациента не найден! Пожалуйста, проверьте, чтобы пациент заполнил номер телефона в настройках профиля.
+            </div>
+
+            <h5 class="mt-5">Подключенные опросники</h5>
+            <div v-if="contractFormsLoading" class="d-flex justify-content-center">
                 <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Loading...</span>
+                    <span class="visually-hidden">Загрузка...</span>
                 </div>
             </div>
-            <div v-else>
-                <h1>Настройки агента звонков</h1>
-
-                <div v-if="patient_phone == null" class="alert alert-danger mt-5" role="alert">
-                    Номер телефона пациента не найден! Пожалуйста, проверьте, чтобы пациент заполнил номер телефона в настройках профиля.
+            <div v-else class="list-group">
+                <div v-for="form in connectedForms" class="list-group-item d-flex justify-content-between align-items-center">
+                    [[ form.name ]]
+                <button type="button" class="btn btn-danger" @click="deleteForm(form.scenario_id)">Удалить</button>
                 </div>
+                <button type="button" class="list-group-item list-group-item-action active"
+                        aria-current="true" data-bs-toggle="modal" data-bs-target="#addContractModal"
+                        @click="fetchForms()">
+                    Добавить
+                </button>
+            </div>
 
-                <h5 class="mt-5">Подключенные опросники</h5>
-                <div class="list-group">
-                    <div v-for="form in connectedForms" class="list-group-item d-flex justify-content-between align-items-center">
-                        [[ form.name ]]
-                    <button type="button" class="btn btn-danger" @click="deleteForm(form.scenario_id)">Удалить</button>
-                    </div>
-                    <button type="button" class="list-group-item list-group-item-action active"
-                            aria-current="true" data-bs-toggle="modal" data-bs-target="#addContractModal"
-                            @click="fetchForms()">
-                        Добавить
-                    </button>
+            <h5 class="mt-5">Предпочтительное время для звонков</h5>
+            <div v-if="contractTimeSlotsLoading" class="d-flex justify-content-center">
+                <div class="spinner-border" role="status">
+                    <span class="visually-hidden">Загрузка...</span>
                 </div>
-
-                <h5 class="mt-5">Предпочтительное время для звонков</h5>
-                <div class="list-group">
-                    <div v-for="timeSlot in timeSlots" class="list-group-item d-flex justify-content-between align-items-center">
-                        [[ formatTimeSlotTime(timeSlot.time) ]]
-                    <button type="button" class="btn btn-danger" @click="removeTimeSlot(timeSlot.id)">Удалить</button>
-                    </div>
-                    <button type="button" class="list-group-item list-group-item-action active"
-                            aria-current="true" data-bs-toggle="modal" data-bs-target="#AddTimeSlot">Добавить</button>
+            </div>
+            <div v-else class="list-group">
+                <div v-for="timeSlot in timeSlots" class="list-group-item d-flex justify-content-between align-items-center">
+                    [[ formatTimeSlotTime(timeSlot.time) ]]
+                <button type="button" class="btn btn-danger" @click="removeTimeSlot(timeSlot.id)">Удалить</button>
                 </div>
+                <button type="button" class="list-group-item list-group-item-action active"
+                        aria-current="true" data-bs-toggle="modal" data-bs-target="#AddTimeSlot">Добавить</button>
+            </div>
 
-                <h5 class="mt-5" v-if="calls.length">Звонки</h5>
-                <div class="list-group mb-5">
-                    <div  v-for="call in calls" class="container list-group-item">
-                        <div class="row">
-                            <div class="col text-left">
-                                <svg v-if="call.is_incoming" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telephone-inbound" viewBox="0 0 16 16">
-                                    <path d="M15.854.146a.5.5 0 0 1 0 .708L11.707 5H14.5a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 1 0v2.793L15.146.146a.5.5 0 0 1 .708 0zm-12.2 1.182a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"/>
-                                </svg>
-                                <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telephone-outbound" viewBox="0 0 16 16">
-                                        <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511zM11 .5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V1.707l-4.146 4.147a.5.5 0 0 1-.708-.708L14.293 1H11.5a.5.5 0 0 1-.5-.5z"/>
-                                </svg>
-                                <span class="ms-2">[[ parseDateTime(call.updated_at) ]]</span>
-                                <span class="ms-2 badge text-bg-info">[[ call.form.name ]]</span>
-                                <span class="ms-2 badge " :class="getClassForState(call.state)">[[ call.state_ru_localized ]]</span>
-                            </div>
+            <h5 class="mt-5" v-if="calls.length">Звонки <button type="button" @click="fetchContractsCalls()" class="btn">🔄</button></h5>
+            <div class="list-group mb-5">
+                <div  v-for="call in calls" class="container list-group-item">
+                    <div class="row">
+                        <div class="col text-left">
+                            <svg v-if="call.is_incoming" xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telephone-inbound" viewBox="0 0 16 16">
+                                <path d="M15.854.146a.5.5 0 0 1 0 .708L11.707 5H14.5a.5.5 0 0 1 0 1h-4a.5.5 0 0 1-.5-.5v-4a.5.5 0 0 1 1 0v2.793L15.146.146a.5.5 0 0 1 .708 0zm-12.2 1.182a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511z"/>
+                            </svg>
+                            <svg v-else xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-telephone-outbound" viewBox="0 0 16 16">
+                                    <path d="M3.654 1.328a.678.678 0 0 0-1.015-.063L1.605 2.3c-.483.484-.661 1.169-.45 1.77a17.568 17.568 0 0 0 4.168 6.608 17.569 17.569 0 0 0 6.608 4.168c.601.211 1.286.033 1.77-.45l1.034-1.034a.678.678 0 0 0-.063-1.015l-2.307-1.794a.678.678 0 0 0-.58-.122l-2.19.547a1.745 1.745 0 0 1-1.657-.459L5.482 8.062a1.745 1.745 0 0 1-.46-1.657l.548-2.19a.678.678 0 0 0-.122-.58L3.654 1.328zM1.884.511a1.745 1.745 0 0 1 2.612.163L6.29 2.98c.329.423.445.974.315 1.494l-.547 2.19a.678.678 0 0 0 .178.643l2.457 2.457a.678.678 0 0 0 .644.178l2.189-.547a1.745 1.745 0 0 1 1.494.315l2.306 1.794c.829.645.905 1.87.163 2.611l-1.034 1.034c-.74.74-1.846 1.065-2.877.702a18.634 18.634 0 0 1-7.01-4.42 18.634 18.634 0 0 1-4.42-7.009c-.362-1.03-.037-2.137.703-2.877L1.885.511zM11 .5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V1.707l-4.146 4.147a.5.5 0 0 1-.708-.708L14.293 1H11.5a.5.5 0 0 1-.5-.5z"/>
+                            </svg>
+                            <span class="ms-2">[[ parseDateTime(call.updated_at) ]]</span>
+                            <span class="ms-2 badge text-bg-info">[[ call.form.name ]]</span>
+                            <span class="ms-2 badge " :class="getClassForState(call.state)">[[ call.state_ru_localized ]]</span>
                         </div>
                     </div>
                 </div>
@@ -263,7 +274,7 @@
                                   <div class="col">
                                     <select class="form-select" v-model="timeHourSelected">
                                       <option disabled value="-1">Час</option>
-                                      <option v-for="i in 24">[[ i ]]</option>
+                                      <option v-for="(n, i) in 24">[[ i ]]</option>
                                     </select>
                                   </div>
                                   <div class="col">

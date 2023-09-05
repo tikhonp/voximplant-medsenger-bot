@@ -18,6 +18,7 @@ class TimeSlotSerializer(serializers.ModelSerializer):
         fields = ('id', 'time')
 
 
+# noinspection PyMethodMayBeStatic
 class CallSerializer(serializers.ModelSerializer):
     state_ru_localized = serializers.SerializerMethodField()
 

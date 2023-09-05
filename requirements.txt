@@ -2,7 +2,7 @@ python-dotenv==1.0.0
 Markdown==3.4.4
 
 # Django dependencies
-django==4.2.4
+django==4.2.5
 djangorestframework==3.14.0
 django-cors-headers==4.2.0
 requests==2.31.0
