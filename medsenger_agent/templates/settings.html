@@ -50,6 +50,7 @@
                 timeMinuteSelected: -1,
 
                 patient_phone: "",
+                patient_name: null,
             }
         },
         methods: {
@@ -58,6 +59,7 @@
                 axios.get(url_contract, { params: { agent_token: agentToken } })
                     .then((response) => {
                         this.patient_phone = response.data.patient_phone
+                        this.patient_name = response.data.patient_name
                     })
                     .catch((error) => {
                         console.log(error)
@@ -203,7 +205,7 @@
             this.timeMinuteSelected = now.getMinutes()
         },
         template: `
-            <h1>Настройки агента звонков</h1>
+            <h1>Настройки агента звонков <span v-if="patient_name != null">([[ patient_name ]])</span></h1>
 
             <div v-if="patient_phone == null" class="alert alert-danger mt-5" role="alert">
                 Номер телефона пациента не найден! Пожалуйста, проверьте, чтобы пациент заполнил номер телефона в настройках профиля.
