@@ -8,4 +8,4 @@ class CallRequestSerializer(serializers.Serializer):
         FINISH_CALL = 'FINISH_CALL'
 
     action = serializers.ChoiceField(choices=Action.choices)
-    field = serializers.CharField()
+    field = serializers.CharField(allow_blank=True)
