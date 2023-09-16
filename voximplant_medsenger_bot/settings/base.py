@@ -28,6 +28,7 @@ INSTALLED_APPS = [
     'phonenumber_field',
     'medsenger_agent',
     'forms',
+    'forms_ai',
 ]
 
 MIDDLEWARE = [

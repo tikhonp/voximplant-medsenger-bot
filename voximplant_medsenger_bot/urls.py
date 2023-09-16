@@ -11,5 +11,6 @@ urlpatterns = [
     path('', lambda _: HttpResponse("Купил мужик шляпу, а она ему как раз! <a href=\"admin/\">🐔</a>")),
     path('admin/', admin.site.urls),
     path('medsenger/', include('medsenger_agent.urls')),
-    path('forms/', include('forms.urls'))
+    path('forms/', include('forms.urls')),
+    path('forms_ai/', include('forms_ai.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
