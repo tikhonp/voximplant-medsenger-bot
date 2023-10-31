@@ -26,5 +26,10 @@ def run_scenario(scenario_id: int, phone: str, call_id: int, agent_token: str) -
 
     result = answer.get('success', False)
     if not result:
+        if answer.get('result', {}).get('error') == 'Insufficient funds on balance':
+            settings.MEDSENGER_API_CLIENT.notify_admin(
+                "У агента опросники по телефону закончились деньги💰 на счету воксимпланта!!!💳💵 "
+                "Не удается совершить звонок, пациенты в отчаянии((( 😭😤🤬"
+            )
         print(f"run_scenario failed: {answer}")
     return result
