@@ -205,7 +205,7 @@
             this.timeMinuteSelected = now.getMinutes()
         },
         template: `
-            <h1>Настройки агента звонков <span v-if="patient_name != null">([[ patient_name ]])</span></h1>
+            <h1>Опросники по телефону <small class="text-body-secondary" v-if="patient_name != null">(пациент: [[ patient_name ]])</small></h1>
 
             <div v-if="patient_phone == null" class="alert alert-danger mt-5" role="alert">
                 Номер телефона пациента не найден! Пожалуйста, проверьте, чтобы пациент заполнил номер телефона в настройках профиля.
@@ -230,6 +230,12 @@
             </div>
 
             <h5 class="mt-5">Предпочтительное время для звонков</h5>
+            <p><small class="text-body-secondary">
+                Агент будет пытаться совершить звонок в первый назначенный слот, если не добавить слоты, то звонков не будет.
+                Если опросник будет заполнен успешно, то агент позвонит только на следующий день,
+                иначе будет пытаться совершить звонок в следующие слоты.
+                Пожалуйста, уточните у пациента удобное время для звонка и заполните слоты (лучше 3-4).
+            </small></p>
             <div v-if="contractTimeSlotsLoading" class="d-flex justify-content-center">
                 <div class="spinner-border" role="status">
                     <span class="visually-hidden">Загрузка...</span>

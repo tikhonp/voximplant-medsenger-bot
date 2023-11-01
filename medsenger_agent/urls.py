@@ -10,6 +10,7 @@ urlpatterns = [
     path('status', views.MedsengerAgentStatusView.as_view()),
     path('order', views.MedsengerAgentOrderView.as_view()),
     path('settings', views.MedsengerAgentSettingsView.as_view()),
+    path('doctor_options', views.MedsengerAgentSettingsView.as_view()),  # For medsenger button
 
     # Settings page urls
     path('settings/contract/', views.ContractView.as_view()),
