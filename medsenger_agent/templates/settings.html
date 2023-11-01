@@ -49,7 +49,7 @@
                 timeHourSelected: -1,
                 timeMinuteSelected: -1,
 
-                patient_phone: "",
+                patient_phone: null,
                 patient_name: null,
             }
         },
@@ -205,7 +205,8 @@
             this.timeMinuteSelected = now.getMinutes()
         },
         template: `
-            <h1>Опросники по телефону <small class="text-body-secondary" v-if="patient_name != null">(пациент: [[ patient_name ]])</small></h1>
+            <h1>Опросники по телефону</h1>
+            <h4><small class="text-body-secondary" v-if="patient_name != null">Пациент: [[ patient_name ]] <span v-if="patient_phone != null">([[ patient_phone ]])</span></small></h4>
 
             <div v-if="patient_phone == null" class="alert alert-danger mt-5" role="alert">
                 Номер телефона пациента не найден! Пожалуйста, проверьте, чтобы пациент заполнил номер телефона в настройках профиля.
