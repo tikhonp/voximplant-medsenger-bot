@@ -76,7 +76,7 @@ class GetNextTimeSlot(APIView, ContractByAgentTokenMixin):
     """
 
     def get(self, request, *args, **kwargs):
-        time, is_tomorrow = TimeSlot.get_next_timeslot(datetime.now() + timedelta(minutes=2),
+        time, is_tomorrow = TimeSlot.get_next_timeslot(datetime.now() + timedelta(minutes=1),
                                                        contract=self.get_contract())
         return Response({'time': time, 'is_tomorrow': is_tomorrow})
 
