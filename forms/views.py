@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 from django.conf import settings
 from django.shortcuts import get_object_or_404
@@ -76,7 +76,8 @@ class GetNextTimeSlot(APIView, ContractByAgentTokenMixin):
     """
 
     def get(self, request, *args, **kwargs):
-        time, is_tomorrow = TimeSlot.get_next_timeslot(datetime.now(), contract=self.get_contract())
+        time, is_tomorrow = TimeSlot.get_next_timeslot(datetime.now() + timedelta(minutes=2),
+                                                       contract=self.get_contract())
         return Response({'time': time, 'is_tomorrow': is_tomorrow})
 
 
