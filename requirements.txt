@@ -2,15 +2,15 @@ python-dotenv==1.0.0
 Markdown==3.5.1
 
 # Django dependencies
-django==4.2.7
+django==5.0
 djangorestframework==3.14.0
-django-cors-headers==4.3.0
+django-cors-headers==4.3.1
 requests==2.31.0
 django-phonenumber-field[phonenumberslite]==7.2.0
 
 # Integrations
-medsenger-api==0.1.60
+medsenger-api==0.1.61
 
 # Production deploy
 psycopg2-binary==2.9.9
-sentry-sdk[django]==1.33.1
+sentry-sdk[django]==1.39.1

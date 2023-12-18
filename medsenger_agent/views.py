@@ -40,15 +40,18 @@ class MedsengerAgentRemoveContractView(GenericAPIView):
 
 class MedsengerAgentStatusView(GenericAPIView):
     serializer_class = ApiKeyBodySerializer
-    queryset = Contract.objects.filter(is_active=True)
 
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
+
+        tracked_contracts = Contract.objects.filter(is_active=True).values('contract_id')
+        tracked_contract_ids = [i.get('contract_id') for i in tracked_contracts]
+
         data = {
             'is_tracking_data': True,
             'supported_scenarios': [],
-            'tracked_contracts': [i.contract_id for i in self.get_queryset()]
+            'tracked_contracts': tracked_contract_ids
         }
         return Response(data)
 

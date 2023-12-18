@@ -24,8 +24,4 @@ class AgentTokenPermission(BasePermission):
 
     def has_permission(self, request, view):
         agent_token = request.query_params.get('agent_token')
-        try:
-            Contract.objects.get(agent_token=agent_token)
-            return True
-        except ObjectDoesNotExist:
-            return False
+        return Contract.objects.filter(agent_token=agent_token).exists()
