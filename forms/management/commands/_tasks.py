@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, time
 from django.core.exceptions import ObjectDoesNotExist
 from django.db.models import QuerySet, Q
 
-from forms.models import Call, Form
+from forms.models import Call, ConnectedForm
 from medsenger_agent.models import Contract
 
 
@@ -16,11 +16,11 @@ def get_contracts_with_active_form(time_from: time, time_to: time) -> QuerySet:
         Contract
         .objects
         .filter(is_active=True)
-        .prefetch_related('forms')
-        .prefetch_related('time_slot_set')
-        .prefetch_related('forms__call_set')
-        .exclude(forms__isnull=True)
-        .filter(time_slot_set__time__range=(time_from, time_to))
+        .prefetch_related('connected_forms')
+        .prefetch_related('connected_forms__time_slot_set')
+        .prefetch_related('connected_forms__call_set')
+        .exclude(connected_forms__isnull=True)
+        .filter(connected_forms__time_slot_set__time__range=(time_from, time_to))
     )
 
 
@@ -46,38 +46,32 @@ def check_current_calls():
         if contract.timezone_offset is not None:
             current_day_start_date = current_day_start_date - timedelta(minutes=contract.timezone_offset)
 
-        form = contract.forms.exclude(
-            scenario_id__in=Call.objects.filter(
-                Q(contract=contract),
+        form = contract.connected_forms.exclude(
+            pk__in=Call.objects.filter(
+                Q(connected_form__contract=contract),
 
                 # Exclude forms with success calls today
                 Q(updated_at__gte=current_day_start_date, state=Call.State.SUCCESS) |
 
                 # Exclude forms with recently started calls
                 Q(created_at__gte=(now - timedelta(minutes=5)), state=Call.State.CREATED)
-            ).values('form')
+            ).values('connected_form')
         ).first()  # execute only one form at time slot
         print("form: ", form)
         if form is not None:
-            Call.start(contract, form)
+            Call.start(form)
 
 
-def start_call(contract_id: int, form_id: int):
+def start_call(connected_form_id: int):
     """
-    Manually start a call, with contract_id and form_id.
+    Manually start a call, with contract_id and connected_form_id.
     """
 
     try:
-        contract = Contract.objects.get(contract_id=contract_id)
+        form = ConnectedForm.objects.get(pk=connected_form_id)
     except ObjectDoesNotExist:
-        print(f"Failed to find contract with id: {contract_id}")
+        print(f"Failed to find connected form with id: {connected_form_id}")
         return
 
-    try:
-        form = Form.objects.get(scenario_id=form_id)
-    except ObjectDoesNotExist:
-        print(f"Failed to find form with id: {form_id}")
-        return
-
-    call = Call.start(contract, form)
+    call = Call.start(form)
     print(f"Started: {call}")

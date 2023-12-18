@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.permissions import BasePermission
 
 from forms.models import Call
@@ -15,11 +14,7 @@ class AgentTokenPermission(BasePermission):
     def has_object_permission(self, request, view, obj):
         if isinstance(obj, Call):
             agent_token = request.query_params.get('agent_token')
-            try:
-                contract = Contract.objects.get(agent_token=agent_token)
-            except ObjectDoesNotExist:
-                return False
-            return obj.contract == contract
+            return obj.connected_form.contract.agent_token == agent_token
         return True
 
     def has_permission(self, request, view):

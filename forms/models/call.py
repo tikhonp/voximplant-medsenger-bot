@@ -6,8 +6,8 @@ from django.conf import settings
 from django.db import models
 from django.db.models import Sum, Case, When
 
+from forms.models.connected_form import ConnectedForm
 from forms.models.form import Form
-from medsenger_agent.models import Contract
 from utils.voximplant import run_scenario
 
 
@@ -52,8 +52,7 @@ class Call(models.Model):
         def ru_localized(self) -> str:
             strings: Dict[Call.State, str] = {
                 Call.State.CREATED: "Звонок начался",
-                Call.State.SUCCESS: "Успешно завершён",
-                Call.State.VOICEMAIL_DETECTED: "Перенаправлен на автоответчик",
+                Call.State.SUCCESS: "Успешно завершён", Call.State.VOICEMAIL_DETECTED: "Перенаправлен на автоответчик",
                 Call.State.THE_NUMBER_IS_BUSY: "Телефон пациента занят",
                 Call.State.THE_CALLEE_HAS_NOT_ANSWERED: "Пациент не ответил",
                 Call.State.THE_CALLEE_HAS_BEEN_DECLINED: "Пациент отклонил звонок",
@@ -76,8 +75,7 @@ class Call(models.Model):
                     Call.State.PHONE_IS_NONE, Call.State.RUN_SCENARIO_FAILED, Call.State.DENIED_BY_USER,
                     Call.State.DENIED_BY_USER, Call.State.FAILED_DURING_SCENARIO]
 
-    form = models.ForeignKey(Form, on_delete=models.CASCADE, related_name='call_set')
-    contract = models.ForeignKey(Contract, on_delete=models.CASCADE, related_name='call_set')
+    connected_form = models.ForeignKey(ConnectedForm, on_delete=models.CASCADE, related_name='call_set')
 
     state = models.CharField(max_length=28, choices=State.choices)
 
@@ -90,8 +88,8 @@ class Call(models.Model):
         ordering = ('-updated_at',)
 
     def __str__(self):
-        return (f"Call(id={self.id}, form={self.form.scenario_id}, "
-                f"contract={self.contract.contract_id}, state={self.state})")
+        return (f"Call(id={self.id}, form={self.connected_form.form.scenario_id}, "
+                f"contract={self.connected_form.contract.contract_id}, state={self.state})")
 
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
@@ -123,13 +121,13 @@ class Call(models.Model):
         Check if n_max_failed_call of last calls to this contract failed. And send message to doctor about it.
         """
 
-        calls = Call.objects.filter(contract=self.contract)
+        calls = Call.objects.filter(connected_form=self.connected_form)
 
         last_success_calls_number = (calls[:n_max_failed_call].aggregate(
             success_calls=Sum(Case(When(state=Call.State.SUCCESS, then=1)), output_field=models.IntegerField())))
 
         if calls.count() >= n_max_failed_call and last_success_calls_number.get('success_calls') == 0:
-            settings.MEDSENGER_API_CLIENT.send_message(self.contract.contract_id,
+            settings.MEDSENGER_API_CLIENT.send_message(self.connected_form.contract.contract_id,
                                                        "Нам не удается дозвониться до пациента, пожалуйста, проверьте!",
                                                        only_doctor=True, is_urgent=True)
 
@@ -138,8 +136,13 @@ class Call(models.Model):
         Run a voximplant scenario (execute call).
         """
 
-        if not run_scenario(self.form.scenario_id, self.contract.patient_phone.as_e164,
-                            self.id, self.contract.agent_token):
+        success = run_scenario(
+            scenario_id=self.connected_form.form.scenario_id,
+            phone=self.connected_form.contract.patient_phone.as_e164,
+            call_id=self.id,
+            agent_token=self.connected_form.contract.agent_token
+        )
+        if not success:
             self.state = Call.State.RUN_SCENARIO_FAILED
             self.save()
 
@@ -149,22 +152,22 @@ class Call(models.Model):
         """
 
         self.state = Call.State.SUCCESS
-        Form.commit_on_finish(self.contract, form_params)
+        Form.commit_on_finish(self.connected_form.contract, form_params)
         self.save()
 
     @staticmethod
-    def start(contract: Contract, form: Form) -> Call:
+    def start(connected_form: ConnectedForm) -> Call:
         """
         Start call for specific contract and form.
         Creates `Call` object checks contract for phone is not None and runs call.
         """
 
-        if contract.patient_phone is None:
-            call = Call(form=form, contract=contract, state=Call.State.PHONE_IS_NONE)
+        if connected_form.contract.patient_phone is None:
+            call = Call(connected_form=connected_form, state=Call.State.PHONE_IS_NONE)
             call.save()
             return call
 
-        call = Call(form=form, contract=contract, state=Call.State.CREATED)
+        call = Call(connected_form=connected_form, state=Call.State.CREATED)
         call.save()
         call.__run_scenario()
         return call

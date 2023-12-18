@@ -42,10 +42,10 @@
                 contractTimeSlotsLoading: false,
 
                 connectedForms: [],
-                timeSlots: [],
                 forms: [],
                 calls: [],
-
+                
+                selectedConnectedForm: null,
                 timeHourSelected: -1,
                 timeMinuteSelected: -1,
 
@@ -65,9 +65,9 @@
                         console.log(error)
                     })
             },
-            fetchContractForms() {
+            fetchContractConnectedForms() {
                 this.contractFormsLoading = true
-                let url_forms = `${baseUrl}/medsenger/settings/contract/forms/`
+                let url_forms = `${baseUrl}/medsenger/settings/contract/connected_forms/`
                 axios.get(url_forms, { params: { agent_token: agentToken } })
                     .then((response) => {
                         this.connectedForms = response.data
@@ -76,19 +76,6 @@
                     .catch((error) => {
                         console.log(error)
                         this.contractFormsLoading = false
-                    })
-            },
-            fetchContractTimeSlots() {
-                this.contractTimeSlotsLoading = true
-                let url_time_slots = `${baseUrl}/medsenger/settings/contract/time_slots/`
-                axios.get(url_time_slots, { params: { agent_token: agentToken } })
-                    .then((response) => {
-                        this.timeSlots = response.data
-                        this.contractTimeSlotsLoading = false
-                    })
-                    .catch((error) => {
-                        console.log(error)
-                        this.contractTimeSlotsLoading = false
                     })
             },
             fetchContractsCalls() {
@@ -101,22 +88,22 @@
                         console.log(error)
                     })
             },
-            deleteForm(scenario_id) {
-                let url = `${baseUrl}/medsenger/settings/contract/forms/${scenario_id}/`
+            deleteForm(connectedFormId) {
+                let url = `${baseUrl}/medsenger/settings/contract/connected_forms/${connectedFormId}/`
                 axios.delete(url, { params: { agent_token: agentToken } })
                     .then((response) => {
-                        this.fetchContractForms()
+                        this.fetchContractConnectedForms()
                     })
                     .catch((error) => {
                         console.log(error)
                     })
             },
             addForm(scenario_id) {
-                let url_forms = `${baseUrl}/medsenger/settings/contract/forms/`
-                let data = { scenario_id: scenario_id }
+                let url_forms = `${baseUrl}/medsenger/settings/contract/connected_forms/`
+                let data = { form: scenario_id }
                 axios.post(url_forms, data, { params: { agent_token: agentToken } })
                     .then((response) => {
-                        this.fetchContractForms()
+                        this.fetchContractConnectedForms()
                         $('#addContractModal').modal('hide')
                     })
                     .catch((error) => {
@@ -125,11 +112,28 @@
             },
             addTimeSlot() {
                 let datetime = new Date(1970, 1, 1, this.timeHourSelected, this.timeMinuteSelected)
+                let currentHours = ("0" + datetime.getUTCHours()).slice(-2)
+                let currentMinutes = ("0" + datetime.getUTCMinutes()).slice(-2)
+                let datetimeString = `${currentHours}:${currentMinutes}:00`
+                
+                let sameTimeslot = this.connectedForms
+                    .find((form) => form.id === this.selectedConnectedForm)
+                    .time_slot_set
+                    .find((timeSlot) => timeSlot.time === datetimeString)
+                    
+                if (sameTimeslot) {
+                    $('#AddTimeSlot').modal('hide')
+                    return
+                }
+                
                 let url = `${baseUrl}/medsenger/settings/contract/time_slots/`
-                let data = { time: `${datetime.getUTCHours()}:${datetime.getUTCMinutes()}` }
+                let data = {
+                    time: datetimeString,
+                    connected_form: this.selectedConnectedForm,
+                }
                 axios.post(url, data, { params: { agent_token: agentToken } })
                     .then((response) => {
-                        this.fetchContractTimeSlots()
+                        this.fetchContractConnectedForms()
                         $('#AddTimeSlot').modal('hide')
                     })
                     .catch((error) => {
@@ -140,7 +144,7 @@
                 let url = `${baseUrl}/medsenger/settings/contract/time_slots/${id}/`
                 axios.delete(url, { params: { agent_token: agentToken } })
                     .then((response) => {
-                        this.fetchContractTimeSlots()
+                        this.fetchContractConnectedForms()
                         $('#AddTimeSlot').modal('hide')
                     })
                     .catch((error) => {
@@ -196,8 +200,7 @@
         },
         mounted() {
             this.fetchContract()
-            this.fetchContractForms()
-            this.fetchContractTimeSlots()
+            this.fetchContractConnectedForms()
             this.fetchContractsCalls()
 
             let now = new Date()
@@ -213,42 +216,41 @@
             </div>
 
             <h5 class="mt-5">Подключенные опросники</h5>
+
+            <button class="btn btn-primary mt-2" type="button" 
+                    aria-current="true" data-bs-toggle="modal" data-bs-target="#addContractModal"
+                            @click="fetchAvailableForms()">Добавить опросник</button>
+
             <div v-if="contractFormsLoading" class="d-flex justify-content-center">
                 <div class="spinner-border" role="status">
                     <span class="visually-hidden">Загрузка...</span>
                 </div>
             </div>
-            <div v-else class="list-group">
-                <div v-for="form in connectedForms" class="list-group-item d-flex justify-content-between align-items-center">
-                    [[ form.name ]]
-                <button type="button" class="btn btn-danger" @click="deleteForm(form.scenario_id)">Удалить</button>
+            <div v-else>
+                <div v-for="connectedForm in connectedForms" class="card mt-2">
+                    <div class="card-body">
+                        <h3 class="card-title">[[ connectedForm.form.name ]]</h3>
+                        <button type="button" class="btn btn-danger" @click="deleteForm(connectedForm.id)">Удалить</button>
+                        <h5 class="mt-5">Предпочтительное время для звонков</h5>
+    
+                        <p><small class="text-body-secondary">
+                            Агент будет пытаться совершить звонок в первый назначенный слот, если не добавить слоты, то звонков не будет.
+                            Если опросник будет заполнен успешно, то агент позвонит только на следующий день,
+                            иначе будет пытаться совершить звонок в следующие слоты.
+                            Пожалуйста, уточните у пациента удобное время для звонка и заполните слоты (лучше 3-4).
+                        </small></p>
+        
+                        <div class="list-group">
+                            <div v-for="timeSlot in connectedForm.time_slot_set" class="list-group-item d-flex justify-content-between align-items-center">
+                                [[ formatTimeSlotTime(timeSlot.time) ]]
+                            <button type="button" class="btn btn-danger" @click="removeTimeSlot(timeSlot.id)">Удалить</button>
+                            </div>
+                            <button type="button" class="list-group-item list-group-item-action active"
+                                    @click="selectedConnectedForm = connectedForm.id"      
+                                    aria-current="true" data-bs-toggle="modal" data-bs-target="#AddTimeSlot">Добавить</button>
+                        </div>
+                    </div>
                 </div>
-                <button type="button" class="list-group-item list-group-item-action active"
-                        aria-current="true" data-bs-toggle="modal" data-bs-target="#addContractModal"
-                        @click="fetchAvailableForms()">
-                    Добавить
-                </button>
-            </div>
-
-            <h5 class="mt-5">Предпочтительное время для звонков</h5>
-            <p><small class="text-body-secondary">
-                Агент будет пытаться совершить звонок в первый назначенный слот, если не добавить слоты, то звонков не будет.
-                Если опросник будет заполнен успешно, то агент позвонит только на следующий день,
-                иначе будет пытаться совершить звонок в следующие слоты.
-                Пожалуйста, уточните у пациента удобное время для звонка и заполните слоты (лучше 3-4).
-            </small></p>
-            <div v-if="contractTimeSlotsLoading" class="d-flex justify-content-center">
-                <div class="spinner-border" role="status">
-                    <span class="visually-hidden">Загрузка...</span>
-                </div>
-            </div>
-            <div v-else class="list-group">
-                <div v-for="timeSlot in timeSlots" class="list-group-item d-flex justify-content-between align-items-center">
-                    [[ formatTimeSlotTime(timeSlot.time) ]]
-                <button type="button" class="btn btn-danger" @click="removeTimeSlot(timeSlot.id)">Удалить</button>
-                </div>
-                <button type="button" class="list-group-item list-group-item-action active"
-                        aria-current="true" data-bs-toggle="modal" data-bs-target="#AddTimeSlot">Добавить</button>
             </div>
 
             <h5 class="mt-5" v-if="calls.length">Звонки <button type="button" @click="fetchContractsCalls()" class="btn">🔄</button></h5>

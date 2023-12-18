@@ -8,7 +8,7 @@ from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from forms.models import Form, Call, TimeSlot
+from forms.models import Form, Call, TimeSlot, ConnectedForm
 from forms.serializers import FormSerializer, FormValueSerializer, UpdateCallSerializer
 from medsenger_agent.models import Contract
 from utils.contract_by_agent_token_mixin import ContractByAgentTokenMixin
@@ -28,7 +28,7 @@ class FormList(ListAPIView):
     authentication_classes = []
 
 
-class RetrieveUpdateCall(GenericAPIView):
+class UpdateCall(GenericAPIView):
     """
     Update call from voximplant scenario.
 
@@ -72,12 +72,17 @@ class GetNextTimeSlot(APIView, ContractByAgentTokenMixin):
     """
     Get next available time slot for contract and get time (`HH:MM:SS`) and `is_tomorrow` flag.
 
-    Note: that `agent_token` must be provided.
+    Note: that `agent_token` must be provided. Also connected_form_id must be provided in query params.
     """
 
     def get(self, request, *args, **kwargs):
-        time, is_tomorrow = TimeSlot.get_next_timeslot(datetime.now() + timedelta(minutes=1),
-                                                       contract=self.get_contract())
+        connected_form_id = request.query_params.get('connected_form_id', '')
+        if not connected_form_id.isdigit():
+            raise ParseError("`connected_form_id` must be digit.")
+        connected_form = get_object_or_404(
+            ConnectedForm.objects.filter(contract=self.get_contract()), pk=connected_form_id)
+        time, is_tomorrow = TimeSlot.get_next_timeslot(
+            datetime.now() + timedelta(minutes=1), connected_form=connected_form)
         return Response({'time': time, 'is_tomorrow': is_tomorrow})
 
 
