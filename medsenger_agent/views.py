@@ -98,7 +98,7 @@ class ContractConnectedFormsView(ListCreateAPIView, ContractByAgentTokenMixin):
     serializer_class = ConnectedFormSerializer
 
     def get_queryset(self):
-        return ConnectedForm.objects.filter(contract=self.get_contract())
+        return ConnectedForm.objects.filter(contract=self.get_contract(), is_active=True)
 
     def perform_create(self, serializer):
         serializer.save(contract=self.get_contract())
@@ -114,7 +114,11 @@ class ContractConnectedFormDetailView(RetrieveDestroyAPIView, ContractByAgentTok
     serializer_class = ConnectedFormSerializer
 
     def get_queryset(self):
-        return ConnectedForm.objects.filter(contract=self.get_contract())
+        return ConnectedForm.objects.filter(contract=self.get_contract(), is_active=True)
+
+    def perform_destroy(self, instance):
+        instance.is_active = False
+        instance.save()
 
 
 class ContractCreateTimeSlotsView(CreateAPIView, ContractByAgentTokenMixin):
