@@ -3,7 +3,7 @@ from datetime import datetime, timedelta
 from django.conf import settings
 from django.shortcuts import get_object_or_404
 from phonenumber_field.phonenumber import PhoneNumber
-from rest_framework.exceptions import ParseError, PermissionDenied
+from rest_framework.exceptions import ParseError, PermissionDenied, NotFound
 from rest_framework.generics import ListAPIView, GenericAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -90,19 +90,28 @@ class GetNextTimeSlot(APIView, ContractByAgentTokenMixin):
 class GetAgentToken(APIView):
     """
     Get agent token by phone number allow requests only from voximplant.
-    Accepts `phone` and `voximplant_key` query params.
+    Accepts `phone`, `form_id` and `voximplant_key` query params.
     """
 
     def get(self, request, *args, **kwargs):
         phone = request.query_params.get('phone')
         voximplant_key = request.query_params.get('voximplant_key')
+        form_id = request.query_params.get('form_id')
 
-        if phone is None or voximplant_key is None:
-            raise ParseError("`phone` and `voximplant_key` are required query params")
+        if phone is None or voximplant_key is None or form_id is None:
+            raise ParseError("`phone`, `form_id` and `voximplant_key` are required query params")
 
         if settings.VOXIMPLANT_INBOUND_CALLS_SECRET_KEY != voximplant_key:
             raise PermissionDenied("`voximplant_key` is invalid.")
 
         contract = get_object_or_404(Contract.objects.all(), patient_phone=PhoneNumber.from_string(phone, region='RU'))
 
-        return Response({'agent_token': contract.agent_token})
+        try:
+            connected_form = contract.connected_forms.get(form__pk=form_id)
+        except ConnectedForm.DoesNotExist:
+            raise NotFound("Connected form not found.")
+
+        return Response({
+            'agent_token': contract.agent_token,
+            'connected_form_id': connected_form.id
+        })

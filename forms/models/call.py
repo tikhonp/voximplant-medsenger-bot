@@ -140,7 +140,8 @@ class Call(models.Model):
             scenario_id=self.connected_form.form.scenario_id,
             phone=self.connected_form.contract.patient_phone.as_e164,
             call_id=self.id,
-            agent_token=self.connected_form.contract.agent_token
+            agent_token=self.connected_form.contract.agent_token,
+            connected_form_id=self.connected_form.id
         )
         if not success:
             self.state = Call.State.RUN_SCENARIO_FAILED

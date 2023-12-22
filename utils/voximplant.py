@@ -4,7 +4,7 @@ import requests
 from django.conf import settings
 
 
-def run_scenario(scenario_id: int, phone: str, call_id: int, agent_token: str) -> bool:
+def run_scenario(scenario_id: int, phone: str, call_id: int, agent_token: str, connected_form_id: int) -> bool:
     """Runs a voximplant scenario."""
 
     url = f"https://{settings.VOXIMPLANT_API_HOSTNAME}/api/v3/scenario/runScenario"
@@ -18,7 +18,8 @@ def run_scenario(scenario_id: int, phone: str, call_id: int, agent_token: str) -
         'variables': json.dumps({
             'call_id': call_id,
             'agent_token': agent_token,
-            'host': settings.HOST
+            'host': settings.HOST,
+            'connected_form_id': connected_form_id
         }),
         'phone_number_id': settings.VOXIMPLANT_CALLER_ID
     }
