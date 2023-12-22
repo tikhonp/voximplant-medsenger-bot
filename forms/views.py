@@ -106,9 +106,10 @@ class GetAgentToken(APIView):
 
         contract = get_object_or_404(Contract.objects.all(), patient_phone=PhoneNumber.from_string(phone, region='RU'))
 
-        try:
-            connected_form = contract.connected_forms.get(form__pk=form_id)
-        except ConnectedForm.DoesNotExist:
+        # FIXME: Get near time slot
+        connected_form = contract.connected_forms.filter(form__pk=form_id).first()
+
+        if connected_form is None:
             raise NotFound("Connected form not found.")
 
         return Response({
