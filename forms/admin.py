@@ -22,5 +22,6 @@ class CallAdmin(admin.ModelAdmin):
 
 @admin.register(models.ConnectedForm)
 class ConnectedFormAdmin(admin.ModelAdmin):
-    list_display = ('id', 'contract', 'form', 'created_at', 'updated_at')
+    list_display = ('id', 'contract', 'form', 'is_active', 'created_at', 'updated_at')
     readonly_fields = ('created_at', 'updated_at')
+    list_filter = ('is_active',)
