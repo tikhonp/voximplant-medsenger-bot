@@ -47,6 +47,7 @@ class Call(models.Model):
         RUN_SCENARIO_FAILED = 'RUN_SCENARIO_FAILED'
         DENIED_BY_USER = 'DENIED_BY_USER'
         FAILED_DURING_SCENARIO = 'FAILED_DURING_SCENARIO'
+        THE_CALLEE_DID_NOT_ANSWER_THE_QUESTION = 'THE_CALLEE_DID_NOT_ANSWER_THE_QUESTION'
 
         @property
         def ru_localized(self) -> str:
@@ -64,6 +65,7 @@ class Call(models.Model):
                 Call.State.RUN_SCENARIO_FAILED: "Ошибка при запуске сценария",
                 Call.State.DENIED_BY_USER: "Пациенту неудобно принять звонок",
                 Call.State.FAILED_DURING_SCENARIO: "Ошибка во время сценария",
+                Call.State.THE_CALLEE_DID_NOT_ANSWER_THE_QUESTION: "Пациент не ответил на вопрос",
             }
             return strings[self]
 
@@ -77,7 +79,7 @@ class Call(models.Model):
 
     connected_form = models.ForeignKey(ConnectedForm, on_delete=models.CASCADE, related_name='call_set')
 
-    state = models.CharField(max_length=28, choices=State.choices)
+    state = models.CharField(max_length=100, choices=State.choices)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
