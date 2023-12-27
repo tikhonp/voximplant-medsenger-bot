@@ -2,6 +2,8 @@ from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.exceptions import ValidationError
 from rest_framework.generics import CreateAPIView, GenericAPIView, ListCreateAPIView, RetrieveDestroyAPIView, \
     RetrieveAPIView
 from rest_framework.renderers import TemplateHTMLRenderer
@@ -133,6 +135,9 @@ class ContractCreateTimeSlotsView(CreateAPIView, ContractByAgentTokenMixin):
     def perform_create(self, serializer):
         if serializer.validated_data.get('connected_form').contract != self.get_contract():
             raise PermissionDenied('`connected_form` is invalid or does not exists.')
+        if TimeSlot.objects.filter(time=serializer.validated_data.get('time'),
+                                   connected_form=serializer.validated_data.get('connected_form')).exists():
+            raise ValidationError('Time slot already exists.', code=status.HTTP_409_CONFLICT)
         serializer.save()
 
 

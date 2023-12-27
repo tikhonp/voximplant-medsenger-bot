@@ -75,7 +75,8 @@ class Call(models.Model):
                     Call.State.THE_CALLEE_HAS_NOT_ANSWERED, Call.State.THE_CALLEE_HAS_BEEN_DECLINED,
                     Call.State.INVALID_NUMBER, Call.State.THE_CALLEE_IS_UNAVAILABLE, Call.State.CALL_IS_FORBIDDEN,
                     Call.State.PHONE_IS_NONE, Call.State.RUN_SCENARIO_FAILED, Call.State.DENIED_BY_USER,
-                    Call.State.DENIED_BY_USER, Call.State.FAILED_DURING_SCENARIO]
+                    Call.State.DENIED_BY_USER, Call.State.FAILED_DURING_SCENARIO,
+                    Call.State.THE_CALLEE_DID_NOT_ANSWER_THE_QUESTION]
 
     connected_form = models.ForeignKey(ConnectedForm, on_delete=models.CASCADE, related_name='call_set')
 
