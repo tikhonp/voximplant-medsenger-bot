@@ -1,4 +1,3 @@
-from django.core.exceptions import ObjectDoesNotExist
 from rest_framework.exceptions import PermissionDenied
 
 from medsenger_agent.models import Contract
@@ -12,5 +11,5 @@ class ContractByAgentTokenMixin:
 
         try:
             return Contract.objects.get(agent_token=self.request.query_params.get('agent_token'))
-        except ObjectDoesNotExist:
+        except Contract.DoesNotExist:
             raise PermissionDenied('`agent_token` is invalid or does not exists.')

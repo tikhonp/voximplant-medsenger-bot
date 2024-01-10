@@ -164,7 +164,7 @@ class ContractCallsView(ListCreateAPIView, ContractByAgentTokenMixin):
     serializer_class = CallSerializer
 
     def get_queryset(self):
-        return Call.objects.filter(connected_form__contract=self.get_contract()).select_related('connected_form')
+        return Call.objects.filter(connected_form__contract=self.get_contract()).select_related('connected_form__form')
 
     def perform_create(self, serializer):
         if serializer.validated_data.get('connected_form').contract != self.get_contract():
