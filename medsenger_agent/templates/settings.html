@@ -40,10 +40,12 @@
             return {
                 contractFormsLoading: false,
                 contractTimeSlotsLoading: false,
+                callsLoading: false,
 
                 connectedForms: [],
                 forms: [],
                 calls: [],
+                nextCallFetchLink: null,
                 
                 selectedConnectedForm: null,
                 timeHourSelected: -1,
@@ -78,14 +80,23 @@
                         this.contractFormsLoading = false
                     })
             },
-            fetchContractsCalls() {
-                let url_calls = `${baseUrl}/medsenger/settings/contract/calls/`
-                axios.get(url_calls, { params: { agent_token: agentToken } })
+            fetchContractsCalls(fromScratch = false) {
+                let url_calls
+                if (this.nextCallFetchLink && !fromScratch) {
+                    url_calls = this.nextCallFetchLink
+                } else {
+                    url_calls = `${baseUrl}/medsenger/settings/contract/calls/?agent_token=${agentToken}`
+                }
+                this.callsLoading = true
+                axios.get(url_calls)
                     .then((response) => {
-                        this.calls = response.data
+                        this.calls = this.calls.concat(response.data.results)
+                        this.nextCallFetchLink = response.data.next
+                        this.callsLoading = false
                     })
                     .catch((error) => {
                         console.log(error)
+                        this.callsLoading = false
                     })
             },
             deleteForm(connectedFormId) {
@@ -253,8 +264,12 @@
                 </div>
             </div>
 
-            <h5 class="mt-5" v-if="calls.length">Звонки <button type="button" @click="fetchContractsCalls()" class="btn">🔄</button></h5>
-            <div class="list-group mb-5">
+            <h5 class="mt-5" v-if="calls.length">
+                Звонки 
+                <span v-if="callsLoading" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                <button v-else type="button" @click="fetchContractsCalls(true)" class="btn">🔄</button>
+            </h5>
+            <div class="list-group mb-3">
                 <div  v-for="call in calls" class="container list-group-item">
                     <div class="row">
                         <div class="col text-left">
@@ -271,6 +286,10 @@
                     </div>
                 </div>
             </div>
+            <button v-if="nextCallFetchLink" class="btn btn-secondary mb-5" type="button" @click="fetchContractsCalls()">
+                <span v-if="callsLoading" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+                Загрузить еще историю вызовов
+            </button>
 
             <div class="modal fade" id="AddTimeSlot" tabindex="-1" aria-labelledby="AddTimeSlotLabel" aria-hidden="true">
                 <div class="modal-dialog">

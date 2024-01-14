@@ -82,7 +82,7 @@ class Call(models.Model):
 
     state = models.CharField(max_length=100, choices=State.choices)
 
-    created_at = models.DateTimeField(auto_now_add=True)
+    created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     is_incoming = models.BooleanField(default=False)

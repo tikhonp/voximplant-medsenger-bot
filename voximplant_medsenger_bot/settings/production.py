@@ -48,7 +48,7 @@ DATABASES = {
 REST_FRAMEWORK = {
     'DEFAULT_RENDERER_CLASSES': [
         'rest_framework.renderers.JSONRenderer',
-    ]
+    ],
 }
 
 MEDSENGER_API_CLIENT = AgentApiClient(

@@ -4,8 +4,10 @@ from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
+from rest_framework.filters import OrderingFilter
 from rest_framework.generics import CreateAPIView, GenericAPIView, ListCreateAPIView, RetrieveDestroyAPIView, \
     RetrieveAPIView
+from rest_framework.pagination import CursorPagination
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -162,6 +164,11 @@ class ContractCallsView(ListCreateAPIView, ContractByAgentTokenMixin):
     """
 
     serializer_class = CallSerializer
+    filter_backends = [OrderingFilter]
+    pagination_class = CursorPagination
+    pagination_class.page_size = 100
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['-created_at']
 
     def get_queryset(self):
         return Call.objects.filter(connected_form__contract=self.get_contract()).select_related('connected_form__form')

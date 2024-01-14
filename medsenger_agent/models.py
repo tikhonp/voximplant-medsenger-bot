@@ -9,7 +9,7 @@ class Contract(models.Model):
     contract_id = models.IntegerField(unique=True, primary_key=True)
 
     is_active = models.BooleanField(default=True)
-    agent_token = models.CharField(max_length=255)
+    agent_token = models.CharField(max_length=255, db_index=True)
 
     patient_name = models.CharField(max_length=255)
     patient_email = models.EmailField(null=True, default=None)
