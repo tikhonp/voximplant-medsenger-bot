@@ -207,9 +207,32 @@
                     })
                 }
             },
-            getClassForState(state){
+            getClassForState(state) {
                 return state === 'SUCCESS' ? 'text-bg-success' : 'bg-secondary'
-            }
+            },
+            getCallDuration(call) {
+                if (call.state === 'SUCCESS' || 
+                    call.state === 'THE_CALLEE_HAS_NOT_ANSWERED' ||
+                    call.state === 'THE_CALLEE_STOPPED_CALL' ||
+                    call.state === 'DENIED_BY_USER' ||
+                    call.state === 'FAILED_DURING_SCENARIO' || 
+                    call.state === 'THE_CALLEE_DID_NOT_ANSWER_THE_QUESTION') {
+                    
+                    let createdAt = new Date(`${call.created_at}Z`)
+                    let updatedAt = new Date(`${call.updated_at}Z`)
+                    let differenceInSeconds = (updatedAt - createdAt) / 1000
+
+                    let minutes = ~~(differenceInSeconds / 60)
+                    let seconds = ~~(differenceInSeconds % 60)
+
+                    let formattedMinutes = ("0" + minutes).slice(-2)
+                    let formattedSeconds = ("0" + seconds).slice(-2)
+                    
+                    return `${formattedMinutes}:${formattedSeconds}`
+                } else {
+                    return ""
+                }
+            },
         },
         mounted() {
             this.fetchContract()
@@ -284,6 +307,7 @@
                             <span class="ms-2">[[ parseDateTime(call.updated_at) ]]</span>
                             <span class="ms-2 badge text-bg-info">[[ call.form.name ]]</span>
                             <span class="ms-2 badge " :class="getClassForState(call.state)">[[ call.state_ru_localized ]]</span>
+                            <span class="ms-2">[[ getCallDuration(call) ]]</span>
                         </div>
                     </div>
                 </div>

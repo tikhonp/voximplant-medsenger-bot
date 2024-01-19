@@ -88,7 +88,7 @@ class Call(models.Model):
     is_incoming = models.BooleanField(default=False)
 
     class Meta:
-        ordering = ('-updated_at',)
+        ordering = ('-created_at',)
 
     def __str__(self):
         return (f"Call(id={self.id}, form={self.connected_form.form.scenario_id}, "
@@ -119,20 +119,28 @@ class Call(models.Model):
         self.state = states_dict.get(voximplant_state, scenario_state)
         self.save()
 
-    def on_call_fail(self, n_max_failed_call: int = 3):
+    def on_call_fail(self, n_max_failed_call: int = 5):
         """
         Check if n_max_failed_call of last calls to this contract failed. And send message to doctor about it.
         """
 
         calls = Call.objects.filter(connected_form=self.connected_form)
 
-        last_success_calls_number = (calls[:n_max_failed_call].aggregate(
-            success_calls=Sum(Case(When(state=Call.State.SUCCESS, then=1)), output_field=models.IntegerField())))
+        last_success_calls_number = (
+            calls[:n_max_failed_call].aggregate(
+                success_calls=Sum(
+                    Case(When(state=Call.State.SUCCESS, then=1), default=0),
+                    output_field=models.IntegerField()),
+            )
+        )
 
         if calls.count() >= n_max_failed_call and last_success_calls_number.get('success_calls') == 0:
-            settings.MEDSENGER_API_CLIENT.send_message(self.connected_form.contract.contract_id,
-                                                       "Нам не удается дозвониться до пациента, пожалуйста, проверьте!",
-                                                       only_doctor=True, is_urgent=True)
+            settings.MEDSENGER_API_CLIENT.send_message(
+                self.connected_form.contract.contract_id,
+                "Агенту не удается дозвониться до пациента. Пожалуйста, проверьте, что все в порядке!",
+                only_doctor=True,
+                is_urgent=True
+            )
 
     def __run_scenario(self):
         """
