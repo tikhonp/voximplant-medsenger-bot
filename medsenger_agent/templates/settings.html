@@ -181,10 +181,12 @@
             parseDateTime(dateTimeString) {
                 let now = new Date()
                 let date = new Date(`${dateTimeString}Z`)
+                
+                let isToday = date.getDate() === now.getDate() &&
+                                date.getMonth() === now.getMonth() &&
+                                date.getFullYear() === now.getFullYear()
 
-                if (date.getDay() === now.getDay() &&
-                    date.getMonth() === now.getMonth() &&
-                    date.getFullYear() === now.getFullYear()) {
+                if (isToday) {
                     return `Сегодня в ${date.toLocaleString(undefined, {
                         timeStyle: "short",
                     })}`
