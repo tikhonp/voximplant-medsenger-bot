@@ -90,7 +90,11 @@
                 this.callsLoading = true
                 axios.get(url_calls)
                     .then((response) => {
-                        this.calls = this.calls.concat(response.data.results)
+                        if (fromScratch) {
+                            this.calls = response.data.results
+                        } else {
+                            this.calls = this.calls.concat(response.data.results)
+                        }
                         this.nextCallFetchLink = response.data.next
                         this.callsLoading = false
                     })
