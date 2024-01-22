@@ -19,7 +19,7 @@ class TimeSlotAdmin(admin.ModelAdmin):
 @admin.action(description="Export selected calls for statistic")
 def export_as_csv(self, request, queryset):
     meta = self.model._meta
-    field_names = [field.name for field in meta.fields]
+    field_names = ['id', 'created_at', 'updated_at', 'state', 'patient_name', 'patient_phone']
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = 'attachment; filename={}.csv'.format(
