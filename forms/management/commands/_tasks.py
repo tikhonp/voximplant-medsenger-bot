@@ -49,8 +49,7 @@ def check_current_calls():
         if contract.timezone_offset is not None:
             current_day_start_date = current_day_start_date - timedelta(minutes=contract.timezone_offset)
 
-        form = contract.connected_forms.exclude(
-            is_active=False,
+        form = contract.connected_forms.filter(is_active=True).exclude(
             pk__in=Call.objects.filter(
                 Q(connected_form__contract=contract),
 
