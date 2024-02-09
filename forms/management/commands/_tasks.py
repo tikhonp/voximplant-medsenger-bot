@@ -15,10 +15,12 @@ def get_contracts_with_active_form(time_from: time, time_to: time) -> QuerySet:
     return (
         Contract
         .objects
-        .filter(is_active=True)
-        .exclude(connected_forms__isnull=True)
-        .filter(connected_forms__is_active=True)
-        .filter(connected_forms__time_slot_set__time__range=(time_from, time_to))
+        .filter(
+            is_active=True,
+            connected_forms__is_active=True,
+            connected_forms__time_slot_set__time__range=(time_from, time_to),
+            connected_forms__isnull=False
+        )
         .prefetch_related('connected_forms')
         .prefetch_related('connected_forms__time_slot_set')
         .prefetch_related('connected_forms__call_set')
@@ -48,6 +50,7 @@ def check_current_calls():
             current_day_start_date = current_day_start_date - timedelta(minutes=contract.timezone_offset)
 
         form = contract.connected_forms.exclude(
+            is_active=False,
             pk__in=Call.objects.filter(
                 Q(connected_form__contract=contract),
 

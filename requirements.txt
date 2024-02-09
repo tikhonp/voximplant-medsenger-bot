@@ -1,4 +1,4 @@
-python-dotenv==1.0.0
+python-dotenv==1.0.1
 Markdown==3.5.2
 
 # Django dependencies
@@ -9,8 +9,8 @@ requests==2.31.0
 django-phonenumber-field[phonenumberslite]==7.3.0
 
 # Integrations
-medsenger-api==0.1.61
+medsenger-api==0.1.62
 
 # Production deploy
 psycopg2-binary==2.9.9
-sentry-sdk[django]==1.39.2
+sentry-sdk[django]==1.40.3
