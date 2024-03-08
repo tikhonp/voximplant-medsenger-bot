@@ -1,6 +1,7 @@
 import json
 
 import requests
+import sentry_sdk
 from django.conf import settings
 
 
@@ -24,13 +25,15 @@ def run_scenario(scenario_id: int, phone: str, call_id: int, agent_token: str, c
         'phone_number_id': settings.VOXIMPLANT_CALLER_ID
     }
     answer = requests.post(url, params=params, data=data).json()
-
     result = answer.get('success', False)
     if not result:
-        if answer.get('result', {}).get('error') == 'Insufficient funds on balance':
+        error = answer.get('result', {}).get('error')
+        if error == 'Insufficient funds on balance':
             settings.MEDSENGER_API_CLIENT.notify_admin(
                 "У агента опросники по телефону закончились деньги💰 на счету воксимпланта!!!💳💵 "
                 "Не удается совершить звонок, пациенты в отчаянии((( 😭😤🤬"
             )
+        else:
+            sentry_sdk.capture_message(error)
         print(f"run_scenario failed: {answer}")
     return result
