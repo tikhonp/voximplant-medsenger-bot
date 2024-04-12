@@ -1,11 +1,40 @@
 import json
+import os
 
 import requests
 import sentry_sdk
 from django.conf import settings
 
+bank = "./bank/"
+money = bank + "money"
 
-def run_scenario(scenario_id: int, phone: str, call_id: int, agent_token: str, connected_form_id: int) -> bool:
+
+def voximplant_has_money() -> bool:
+    return os.path.exists(money)
+
+
+def no_money():
+    if voximplant_has_money():
+        os.remove(money)
+        settings.MEDSENGER_API_CLIENT.notify_admin(
+            "У агента опросники по телефону закончились деньги💰 на счету воксимпланта!!!💳💵 "
+            "Не удается совершить звонок, пациенты в отчаянии((( 😭😤🤬"
+        )
+
+
+def yeah_money():
+    if not voximplant_has_money():
+        if not os.path.exists(bank):
+            os.makedirs(bank)
+        open(money, 'w').close()
+        settings.MEDSENGER_API_CLIENT.notify_admin(
+            "У агента появились деньги на счету воксимпланта!!!💳💵 "
+            "Теперь можно совершать звонки, пациенты в безопасности))) 😊👍🎉"
+        )
+
+
+def run_scenario(scenario_id: int, phone: str, call_id: int,
+                 agent_token: str, connected_form_id: int) -> bool:
     """Runs a voximplant scenario."""
 
     url = f"https://{settings.VOXIMPLANT_API_HOSTNAME}/api/v3/scenario/runScenario"
@@ -29,11 +58,10 @@ def run_scenario(scenario_id: int, phone: str, call_id: int, agent_token: str, c
     if not result:
         error = answer.get('result', {}).get('error')
         if error == 'Insufficient funds on balance':
-            settings.MEDSENGER_API_CLIENT.notify_admin(
-                "У агента опросники по телефону закончились деньги💰 на счету воксимпланта!!!💳💵 "
-                "Не удается совершить звонок, пациенты в отчаянии((( 😭😤🤬"
-            )
+            no_money()
         else:
             sentry_sdk.capture_message(error)
         print(f"run_scenario failed: {answer}")
+    else:
+        yeah_money()
     return result

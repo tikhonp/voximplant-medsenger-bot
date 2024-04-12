@@ -104,7 +104,8 @@ class GetAgentToken(APIView):
         if settings.VOXIMPLANT_INBOUND_CALLS_SECRET_KEY != voximplant_key:
             raise PermissionDenied("`voximplant_key` is invalid.")
 
-        contract = get_object_or_404(Contract.objects.all(), patient_phone=PhoneNumber.from_string(phone, region='RU'))
+        contract = get_object_or_404(Contract.objects.all(
+        ), patient_phone=PhoneNumber.from_string(phone, region='RU'))
 
         # FIXME: Get near time slot
         connected_form = contract.connected_forms.filter(form__pk=form_id).first()
