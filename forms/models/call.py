@@ -53,7 +53,8 @@ class Call(models.Model):
         def ru_localized(self) -> str:
             strings: Dict[Call.State, str] = {
                 Call.State.CREATED: "Звонок начался",
-                Call.State.SUCCESS: "Успешно завершён", Call.State.VOICEMAIL_DETECTED: "Перенаправлен на автоответчик",
+                Call.State.SUCCESS: "Успешно завершён",
+                Call.State.VOICEMAIL_DETECTED: "Перенаправлен на автоответчик",
                 Call.State.THE_NUMBER_IS_BUSY: "Телефон пациента занят",
                 Call.State.THE_CALLEE_HAS_NOT_ANSWERED: "Пациент не ответил",
                 Call.State.THE_CALLEE_HAS_BEEN_DECLINED: "Пациент отклонил звонок",
