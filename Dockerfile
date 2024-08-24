@@ -38,7 +38,7 @@ FROM base AS prod
 RUN python manage.py collectstatic --noinput --settings=voximplant_medsenger_bot.settings.production
 USER tikhon
 EXPOSE 3045
-CMD ["gunicorn", "--bind", "0.0.0.0:3045", "voximplant_medsenger_bot.wsgi"]
+CMD ["gunicorn", "--bind", "0.0.0.0:3045", "--access-logfile", "-", "-w", "2", "voximplant_medsenger_bot.wsgi:application"]
 
 
 FROM base AS worker

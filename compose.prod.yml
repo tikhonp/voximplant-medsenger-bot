@@ -10,8 +10,6 @@ services:
     network_mode: "host"
     volumes:
       - ./:/app
-    ports:
-      - 3045:3045
     logging:
       driver: "json-file"
       options:
