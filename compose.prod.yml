@@ -1,16 +1,17 @@
 services:
   server:
     container_name: agents-voximplant-server
-    env_file: ".env"
     build:
       context: .
       target: prod
       network: host
+    restart: unless-stopped
+    env_file: ".env"
+    network_mode: "host"
     volumes:
       - ./:/app
     ports:
       - 3045:3045
-    restart: unless-stopped
     logging:
       driver: "json-file"
       options:
@@ -20,7 +21,9 @@ services:
       DJANGO_SETTINGS_MODULE: "voximplant_medsenger_bot.settings.production"
   worker:
     container_name: agents-voximplant-worker
+    restart: unless-stopped
     env_file: ".env"
+    network_mode: "host"
     build:
       context: .
       target: worker
@@ -29,7 +32,6 @@ services:
       DJANGO_SETTINGS_MODULE: "voximplant_medsenger_bot.settings.production"
     depends_on:
       - server
-    restart: unless-stopped
     logging:
       driver: "json-file"
       options:
