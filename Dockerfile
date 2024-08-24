@@ -43,4 +43,4 @@ CMD ["gunicorn", "--bind", "0.0.0.0:3045", "voximplant_medsenger_bot.wsgi"]
 
 FROM base AS worker
 USER tikhon
-CMD ["python", "manage.py", "start_background_worker", "--settings=voximplant_medsenger_bot.settings.development"]
+CMD ["python", "manage.py", "start_background_worker", "--settings=voximplant_medsenger_bot.settings.production"]

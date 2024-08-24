@@ -17,7 +17,7 @@ services:
         max-size: "10m"
         max-file: "3"
     environment:
-      DJANGO_SETTINGS_MODULE: "voximplant_medsenger_bot.settings.development"
+      DJANGO_SETTINGS_MODULE: "voximplant_medsenger_bot.settings.production"
   worker:
     container_name: agents-voximplant-worker
     env_file: ".env"
@@ -26,7 +26,7 @@ services:
       target: worker
       network: host
     environment:
-      DJANGO_SETTINGS_MODULE: "voximplant_medsenger_bot.settings.development"
+      DJANGO_SETTINGS_MODULE: "voximplant_medsenger_bot.settings.production"
     depends_on:
       - server
     restart: unless-stopped
