@@ -16,6 +16,18 @@ class Command(BaseCommand):
         check_current_calls()
 
     def handle(self, *args, **options):
+        if options['one_shot']:
+            check_current_calls()
+            return
         my_scheduler = sched.scheduler(time.time, time.sleep)
         my_scheduler.enter(REPEAT_DELAY_SECONDS, 1, self._task, (my_scheduler,))
         my_scheduler.run()
+
+    def add_arguments(self, parser):
+        parser.add_argument(
+            '-o',
+            '--one-shot',
+            action='store_true',
+            default=False,
+            help='Run worker only once.'
+        )

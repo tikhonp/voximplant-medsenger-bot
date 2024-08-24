@@ -34,20 +34,21 @@ def check_current_calls():
     """
 
     now = datetime.now()
-    print(f"\nnow: {now}")
+    # print(f"\nnow: {now}")
 
     contracts_with_active_forms = get_contracts_with_active_form(
         time_from=now.time(),
         time_to=(now + timedelta(minutes=1)).time()
     )
-    print("contracts_with_active_forms: ", contracts_with_active_forms)
+    # print("contracts_with_active_forms: ", contracts_with_active_forms)
 
     for contract in contracts_with_active_forms:
-        print("CONTRACT: ", contract)
+        # print("CONTRACT: ", contract)
 
         current_day_start_date = datetime.combine(now.date(), time(0, 0, 0))
         if contract.timezone_offset is not None:
-            current_day_start_date = current_day_start_date - timedelta(minutes=contract.timezone_offset)
+            current_day_start_date = current_day_start_date - \
+                timedelta(minutes=contract.timezone_offset)
 
         form = contract.connected_forms.filter(is_active=True).exclude(
             pk__in=Call.objects.filter(
@@ -60,9 +61,11 @@ def check_current_calls():
                 Q(created_at__gte=(now - timedelta(minutes=5)), state=Call.State.CREATED)
             ).values('connected_form')
         ).first()  # execute only one form at time slot
-        print("form: ", form)
+        # print("form: ", form)
         if form is not None:
             Call.start(form)
+
+    print(f"Checked current calls at {now}")
 
 
 def start_call(connected_form_id: int):
@@ -73,8 +76,8 @@ def start_call(connected_form_id: int):
     try:
         form = ConnectedForm.objects.get(pk=connected_form_id)
     except ObjectDoesNotExist:
-        print(f"Failed to find connected form with id: {connected_form_id}")
+        # print(f"Failed to find connected form with id: {connected_form_id}")
         return
 
     call = Call.start(form)
-    print(f"Started: {call}")
+    # print(f"Started: {call}")

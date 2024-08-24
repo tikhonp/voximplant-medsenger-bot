@@ -23,10 +23,9 @@ RUN --mount=type=cache,target=/root/.cache/pip \
     --mount=type=bind,source=requirements.txt,target=requirements.txt \
     python -m pip install -r requirements.txt
 
-COPY . .
-
 
 FROM base AS dev
+COPY . .
 RUN python manage.py makemigrations --noinput --settings=voximplant_medsenger_bot.settings.development \
     && python manage.py migrate --noinput --settings=voximplant_medsenger_bot.settings.development
 USER tikhon
@@ -35,12 +34,16 @@ CMD ["python", "manage.py", "runserver", "0.0.0.0:8000", "--settings=voximplant_
 
 
 FROM base AS prod
+COPY . .
 RUN python manage.py collectstatic --noinput --settings=voximplant_medsenger_bot.settings.production
 USER tikhon
-EXPOSE 3045
 CMD ["gunicorn", "--bind", "0.0.0.0:3045", "--access-logfile", "-", "-w", "2", "voximplant_medsenger_bot.wsgi:application"]
 
 
 FROM base AS worker
-USER tikhon
-CMD ["python", "manage.py", "start_background_worker", "--settings=voximplant_medsenger_bot.settings.production"]
+RUN apt update && apt install -y cron
+RUN touch /var/log/cron.log
+RUN (crontab -l ; echo " * * * * * /usr/local/bin/python /app/manage.py start_background_worker --one-shot > /proc/1/fd/1 2>/proc/1/fd/2\n") | crontab && \
+    printenv | grep -v "no_proxy" >> /etc/environment
+COPY . .
+CMD ["./worker_entrypoint.sh"]
