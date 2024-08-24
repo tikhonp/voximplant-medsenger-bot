@@ -1,0 +1,38 @@
+services:
+  server:
+    container_name: agents-voximplant-server
+    env_file: ".env"
+    build:
+      context: .
+      target: prod
+      network: host
+    volumes:
+      - ./:/app
+    ports:
+      - 3045:3045
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    environment:
+      DJANGO_SETTINGS_MODULE: "voximplant_medsenger_bot.settings.development"
+  worker:
+    container_name: agents-voximplant-worker
+    env_file: ".env"
+    build:
+      context: .
+      target: worker
+      network: host
+    environment:
+      DJANGO_SETTINGS_MODULE: "voximplant_medsenger_bot.settings.development"
+    depends_on:
+      - server
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+

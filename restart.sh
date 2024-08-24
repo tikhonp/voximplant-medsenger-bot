@@ -1,2 +1,0 @@
-supervisorctl restart voximplant
-supervisorctl restart voximplant-jobs
