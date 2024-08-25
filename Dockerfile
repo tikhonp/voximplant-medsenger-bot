@@ -43,7 +43,6 @@ CMD ["gunicorn", "--bind", "0.0.0.0:3045", "--access-logfile", "-", "-w", "2", "
 FROM base AS worker
 RUN apt update && apt install -y cron
 RUN touch /var/log/cron.log
-RUN (crontab -l ; echo " * * * * * /usr/local/bin/python /app/manage.py start_background_worker --one-shot > /proc/1/fd/1 2>/proc/1/fd/2\n") | crontab && \
-    printenv | grep -v "no_proxy" >> /etc/environment
+RUN (crontab -l ; echo " * * * * * /usr/local/bin/python /app/manage.py start_background_worker --one-shot > /proc/1/fd/1 2>/proc/1/fd/2\n") | crontab
 COPY . .
 CMD ["./worker_entrypoint.sh"]
