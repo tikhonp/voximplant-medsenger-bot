@@ -5,8 +5,8 @@ from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.exceptions import ValidationError
 from rest_framework.filters import OrderingFilter
-from rest_framework.generics import CreateAPIView, GenericAPIView, ListCreateAPIView, RetrieveDestroyAPIView, \
-    RetrieveAPIView
+from rest_framework.generics import CreateAPIView, GenericAPIView, ListCreateAPIView, \
+    RetrieveDestroyAPIView, RetrieveAPIView
 from rest_framework.pagination import CursorPagination
 from rest_framework.renderers import TemplateHTMLRenderer
 from rest_framework.response import Response
@@ -36,7 +36,8 @@ class MedsengerAgentRemoveContractView(GenericAPIView):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        instance = get_object_or_404(self.get_queryset(), contract_id=serializer.data.get('contract_id'))
+        instance = get_object_or_404(
+            self.get_queryset(), contract_id=serializer.data.get('contract_id'))
         instance.is_active = False
         instance.save()
 
@@ -53,7 +54,8 @@ class MedsengerAgentStatusView(GenericAPIView):
         tracked_contracts = Contract.objects.filter(is_active=True).values('contract_id')
         tracked_contract_ids = [i.get('contract_id') for i in tracked_contracts]
 
-        data = {'is_tracking_data': True, 'supported_scenarios': [], 'tracked_contracts': tracked_contract_ids}
+        data = {'is_tracking_data': True, 'supported_scenarios': [],
+                'tracked_contracts': tracked_contract_ids}
         return Response(data)
 
 
@@ -73,7 +75,11 @@ class MedsengerAgentSettingsView(APIView):
     def get(self, request):
         contract_id = request.GET.get('contract_id')
         contract = get_object_or_404(Contract.objects.all(), contract_id=contract_id)
-        return Response({'contract_id': contract_id, 'base_url': settings.HOST, 'agent_token': contract.agent_token})
+        return Response({
+            'contract_id': contract_id,
+            'base_url': settings.HOST,
+            'agent_token': contract.agent_token
+        })
 
 
 class MedsengerAgentOrderView(GenericAPIView):
@@ -87,7 +93,8 @@ class MedsengerAgentOrderView(GenericAPIView):
     def post(self, request):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        instance = get_object_or_404(self.get_queryset(), contract_id=serializer.data.get('contract_id'))
+        instance = get_object_or_404(
+            self.get_queryset(), contract_id=serializer.data.get('contract_id'))
         instance.update_user()
         return HttpResponse("ok")
 
@@ -137,8 +144,9 @@ class ContractCreateTimeSlotsView(CreateAPIView, ContractByAgentTokenMixin):
     def perform_create(self, serializer):
         if serializer.validated_data.get('connected_form').contract != self.get_contract():
             raise PermissionDenied('`connected_form` is invalid or does not exists.')
-        if TimeSlot.objects.filter(time=serializer.validated_data.get('time'),
-                                   connected_form=serializer.validated_data.get('connected_form')).exists():
+        if TimeSlot.objects.filter(
+                time=serializer.validated_data.get('time'),
+                connected_form=serializer.validated_data.get('connected_form')).exists():
             raise ValidationError('Time slot already exists.', code=status.HTTP_409_CONFLICT)
         serializer.save()
 
@@ -171,7 +179,10 @@ class ContractCallsView(ListCreateAPIView, ContractByAgentTokenMixin):
     ordering = ['-created_at']
 
     def get_queryset(self):
-        return Call.objects.filter(connected_form__contract=self.get_contract()).select_related('connected_form__form')
+        return (Call
+                .objects
+                .filter(connected_form__contract=self.get_contract())
+                .select_related('connected_form__form'))
 
     def perform_create(self, serializer):
         if serializer.validated_data.get('connected_form').contract != self.get_contract():

@@ -29,7 +29,8 @@ def get_contracts_with_active_form(time_from: time, time_to: time) -> QuerySet:
 
 def check_current_calls():
     """
-    Check for available time_slots in current time and find contracts where call must execute and run calls.
+    Check for available time_slots in current time and find contracts
+        where call must execute and run calls.
     Time interval is now plus one minute.
     """
 
@@ -76,8 +77,8 @@ def start_call(connected_form_id: int):
     try:
         form = ConnectedForm.objects.get(pk=connected_form_id)
     except ObjectDoesNotExist:
-        # print(f"Failed to find connected form with id: {connected_form_id}")
+        print(f"Failed to find connected form with id: {connected_form_id}")
         return
 
     call = Call.start(form)
-    # print(f"Started: {call}")
+    print(f"Started: {call}")

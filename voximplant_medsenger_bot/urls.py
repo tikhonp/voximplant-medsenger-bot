@@ -7,8 +7,13 @@ from django.urls import path, include
 admin.site.site_header = 'Voximplant-Medsenger'
 admin.site.site_title = 'Voximplant-Medsenger integration'
 
+
+def home(request):
+    return HttpResponse("Купил мужик шляпу, а она ему как раз! <a href=\"admin/\">🐔</a>")
+
+
 urlpatterns = [
-    path('', lambda _: HttpResponse("Купил мужик шляпу, а она ему как раз! <a href=\"admin/\">🐔</a>")),
+    path('', home),
     path('admin/', admin.site.urls),
     path('medsenger/', include('medsenger_agent.urls')),
     path('forms/', include('forms.urls')),
