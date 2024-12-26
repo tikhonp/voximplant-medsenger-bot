@@ -4,14 +4,14 @@ Markdown==3.7
 # Django dependencies
 django==4.2.17
 djangorestframework==3.15.2
-django-cors-headers==4.4.0
+django-cors-headers==4.6.0
 requests==2.32.3
 django-phonenumber-field[phonenumberslite]==8.0.0
 
 # Integrations
-medsenger-api==0.1.72
+medsenger-api==0.1.73
 
 # Production deploy
-psycopg2-binary==2.9.9
-sentry-sdk[django]==2.13.0
+psycopg2-binary==2.9.10
+sentry-sdk[django]==2.19.2
 gunicorn==23.0.0
