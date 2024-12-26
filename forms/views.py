@@ -72,7 +72,8 @@ class GetNextTimeSlot(APIView, ContractByAgentTokenMixin):
     """
     Get next available time slot for contract and get time (`HH:MM:SS`) and `is_tomorrow` flag.
 
-    Note: that `agent_token` must be provided. Also connected_form_id must be provided in query params.
+    Note: that `agent_token` must be provided. Also connected_form_id must be provided
+        in query params.
     """
 
     def get(self, request, *args, **kwargs):
@@ -80,7 +81,9 @@ class GetNextTimeSlot(APIView, ContractByAgentTokenMixin):
         if not connected_form_id.isdigit():
             raise ParseError("`connected_form_id` must be digit.")
         connected_form = get_object_or_404(
-            ConnectedForm.objects.filter(contract=self.get_contract(), is_active=True), pk=connected_form_id)
+            ConnectedForm.objects.filter(contract=self.get_contract(), is_active=True),
+            pk=connected_form_id
+        )
         time, is_tomorrow = TimeSlot.get_next_timeslot(
             datetime.now() + timedelta(minutes=1), connected_form=connected_form)
         return Response({'time': time, 'is_tomorrow': is_tomorrow})

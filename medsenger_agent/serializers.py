@@ -16,7 +16,8 @@ class ContractSerializer(ApiKeyBodySerializer):
     patient_name = serializers.CharField(read_only=True)
 
     def create(self, validated_data):
-        instance, created = Contract.objects.get_or_create(contract_id=validated_data.get('contract_id'))
+        instance, created = Contract.objects.get_or_create(
+            contract_id=validated_data.get('contract_id'))
 
         if not created:
             instance.is_active = True

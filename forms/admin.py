@@ -18,7 +18,16 @@ class TimeSlotAdmin(admin.ModelAdmin):
 
 @admin.action(description="Export selected calls as CSV")
 def export_calls_as_csv(self, request, queryset):
-    field_names = ['id', 'created_at', 'updated_at', 'state', 'patient_name', 'patient_phone', 'is_incoming', 'duration']
+    field_names = [
+        'id',
+        'created_at',
+        'updated_at',
+        'state',
+        'patient_name',
+        'patient_phone',
+        'is_incoming',
+        'duration',
+    ]
 
     response = HttpResponse(content_type='text/csv')
     response['Content-Disposition'] = f'attachment; filename={"exported_voximplant_calls"}.csv'

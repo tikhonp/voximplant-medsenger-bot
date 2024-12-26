@@ -7,7 +7,9 @@ from medsenger_agent.models import Contract
 
 
 class Form(models.Model):
-    """Voximplant scenario model, related by `scenario_id` which is equal to voximplant scenario ID."""
+    """
+    Voximplant scenario model, related by `scenario_id` which is equal to voximplant scenario ID.
+    """
 
     scenario_id = models.IntegerField(primary_key=True)
 

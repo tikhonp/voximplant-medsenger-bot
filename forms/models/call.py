@@ -72,14 +72,24 @@ class Call(models.Model):
 
         @staticmethod
         def get_failure_states() -> [Call.State]:
-            return [Call.State.VOICEMAIL_DETECTED, Call.State.THE_NUMBER_IS_BUSY,
-                    Call.State.THE_CALLEE_HAS_NOT_ANSWERED, Call.State.THE_CALLEE_HAS_BEEN_DECLINED,
-                    Call.State.INVALID_NUMBER, Call.State.THE_CALLEE_IS_UNAVAILABLE, Call.State.CALL_IS_FORBIDDEN,
-                    Call.State.PHONE_IS_NONE, Call.State.RUN_SCENARIO_FAILED, Call.State.DENIED_BY_USER,
-                    Call.State.DENIED_BY_USER, Call.State.FAILED_DURING_SCENARIO,
-                    Call.State.THE_CALLEE_DID_NOT_ANSWER_THE_QUESTION]
+            return [
+                Call.State.VOICEMAIL_DETECTED,
+                Call.State.THE_NUMBER_IS_BUSY,
+                Call.State.THE_CALLEE_HAS_NOT_ANSWERED,
+                Call.State.THE_CALLEE_HAS_BEEN_DECLINED,
+                Call.State.INVALID_NUMBER,
+                Call.State.THE_CALLEE_IS_UNAVAILABLE,
+                Call.State.CALL_IS_FORBIDDEN,
+                Call.State.PHONE_IS_NONE,
+                Call.State.RUN_SCENARIO_FAILED,
+                Call.State.DENIED_BY_USER,
+                Call.State.DENIED_BY_USER,
+                Call.State.FAILED_DURING_SCENARIO,
+                Call.State.THE_CALLEE_DID_NOT_ANSWER_THE_QUESTION
+            ]
 
-    connected_form = models.ForeignKey(ConnectedForm, on_delete=models.CASCADE, related_name='call_set')
+    connected_form = models.ForeignKey(
+        ConnectedForm, on_delete=models.CASCADE, related_name='call_set')
 
     state = models.CharField(max_length=100, choices=State.choices)
 
@@ -100,7 +110,9 @@ class Call(models.Model):
         if self.state in Call.State.get_failure_states():
             self.on_call_fail()
 
-    def update_state_from_scenario(self, scenario_state: Call.State, voximplant_state: Call.VoximplantState):
+    def update_state_from_scenario(self,
+                                   scenario_state: Call.State,
+                                   voximplant_state: Call.VoximplantState):
         """
         Compile two statuses from voximplant and call into single db status.
         """
@@ -109,10 +121,14 @@ class Call(models.Model):
             Call.VoximplantState.VOICEMAIL_DETECTOR: Call.State.VOICEMAIL_DETECTED,
             Call.VoximplantState.INITIATED_BY_THE_CALLEE: Call.State.THE_CALLEE_STOPPED_CALL,
             Call.VoximplantState.THE_NUMBER_IS_BUSY: Call.State.THE_NUMBER_IS_BUSY,
-            Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_487: Call.State.THE_CALLEE_HAS_NOT_ANSWERED,
-            Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_408: Call.State.THE_CALLEE_HAS_NOT_ANSWERED,
-            Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_500: Call.State.THE_CALLEE_HAS_NOT_ANSWERED,
-            Call.VoximplantState.THE_CALL_HAS_BEEN_DECLINED: Call.State.THE_CALLEE_HAS_BEEN_DECLINED,
+            Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_487:
+                Call.State.THE_CALLEE_HAS_NOT_ANSWERED,
+            Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_408:
+                Call.State.THE_CALLEE_HAS_NOT_ANSWERED,
+            Call.VoximplantState.THE_CALLEE_HAS_NOT_ANSWERED_500:
+                Call.State.THE_CALLEE_HAS_NOT_ANSWERED,
+            Call.VoximplantState.THE_CALL_HAS_BEEN_DECLINED:
+                Call.State.THE_CALLEE_HAS_BEEN_DECLINED,
             Call.VoximplantState.INVALID_NUMBER: Call.State.INVALID_NUMBER,
             Call.VoximplantState.THE_CALLEE_IS_UNAVAILABLE: Call.State.THE_CALLEE_IS_UNAVAILABLE,
             Call.VoximplantState.CALL_IS_FORBIDDEN: Call.State.CALL_IS_FORBIDDEN,
@@ -122,7 +138,8 @@ class Call(models.Model):
 
     def on_call_fail(self, n_max_failed_call: int = 5):
         """
-        Check if n_max_failed_call of last calls to this contract failed. And send message to doctor about it.
+        Check if n_max_failed_call of last calls to this contract failed.
+        And send message to doctor nbout it.
         """
 
         calls = Call.objects.filter(connected_form=self.connected_form)
@@ -135,10 +152,12 @@ class Call(models.Model):
             )
         )
 
-        if calls.count() >= n_max_failed_call and last_success_calls_number.get('success_calls') == 0:
+        if calls.count() >= n_max_failed_call and \
+                last_success_calls_number.get('success_calls') == 0:
             settings.MEDSENGER_API_CLIENT.send_message(
                 self.connected_form.contract.contract_id,
-                "Агенту не удается дозвониться до пациента. Пожалуйста, проверьте, что все в порядке!",
+                "Агенту не удается дозвониться до пациента. "
+                "Пожалуйста, проверьте, что все в порядке!",
                 only_doctor=True,
                 is_urgent=True
             )
@@ -184,3 +203,4 @@ class Call(models.Model):
         call.save()
         call.__run_scenario()
         return call
+

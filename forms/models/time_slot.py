@@ -13,14 +13,19 @@ class TimeSlot(models.Model):
 
     time = models.TimeField()
 
-    connected_form = models.ForeignKey(ConnectedForm, on_delete=models.CASCADE, related_name='time_slot_set')
+    connected_form = models.ForeignKey(
+        ConnectedForm,
+        on_delete=models.CASCADE,
+        related_name='time_slot_set'
+    )
 
     class Meta:
         unique_together = ('time', 'connected_form')
         ordering = ('time',)
 
     @staticmethod
-    def get_next_timeslot(from_date: datetime, connected_form: ConnectedForm) -> ((python_time | None), bool):
+    def get_next_timeslot(from_date: datetime,
+                          connected_form: ConnectedForm) -> ((python_time | None), bool):
         """
         Get next available time slot, returns time and flag if that time is tomorrow, otherwise now.
         If contract's timezone_offset is not None time will be localized.
@@ -31,8 +36,10 @@ class TimeSlot(models.Model):
         for time_slot in time_slots:
             if time_slot.time > from_date.time():
                 if connected_form.contract.timezone_offset is not None:
-                    localized_date = (datetime.combine(datetime.now().date(), time_slot.time) - timedelta(
-                        minutes=connected_form.contract.timezone_offset))
+                    localized_date = (
+                        datetime.combine(datetime.now().date(), time_slot.time) -
+                        timedelta(minutes=connected_form.contract.timezone_offset)
+                    )
                     return localized_date.time(), False
                 else:
                     return time_slot.time, False
@@ -40,8 +47,10 @@ class TimeSlot(models.Model):
         time_slot = time_slots.first()
         if time_slot is not None:
             if connected_form.contract.timezone_offset is not None:
-                localized_date = (datetime.combine(datetime.now().date(), time_slot.time) - timedelta(
-                    minutes=connected_form.contract.timezone_offset))
+                localized_date = (
+                    datetime.combine(datetime.now().date(), time_slot.time) -
+                    timedelta(minutes=connected_form.contract.timezone_offset)
+                )
                 return localized_date.time(), True
             else:
                 return time_slot.time, True
